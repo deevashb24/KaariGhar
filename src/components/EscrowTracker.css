@@ -1,0 +1,175 @@
+.escrow {
+    padding: var(--space-xl);
+    margin-bottom: var(--space-lg);
+}
+
+.escrow__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--space-lg);
+}
+
+.escrow__order-id {
+    font-size: 0.8rem;
+    color: var(--gold);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    margin-bottom: 2px;
+}
+
+.escrow__item {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.escrow__total {
+    text-align: right;
+}
+
+.escrow__total-label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    display: block;
+}
+
+.escrow__total-value {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--gold);
+}
+
+/* Progress bar */
+.escrow__progress-bar {
+    height: 8px;
+    background: var(--bg-elevated);
+    border-radius: 4px;
+    margin-bottom: var(--space-xl);
+    position: relative;
+    overflow: hidden;
+}
+
+.escrow__progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold-dark), var(--gold), var(--gold-light));
+    border-radius: 4px;
+    transition: width 1s var(--ease-out);
+    position: relative;
+}
+
+.escrow__progress-fill::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    animation: shimmer 2s ease-in-out infinite;
+    background-size: 200% 100%;
+}
+
+.escrow__progress-text {
+    position: absolute;
+    top: 14px;
+    right: 0;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+/* Milestones */
+.escrow__milestones {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.escrow__ms {
+    display: flex;
+    gap: var(--space-md);
+    position: relative;
+    padding-bottom: var(--space-xl);
+}
+
+.escrow__ms:last-child {
+    padding-bottom: 0;
+}
+
+.escrow__connector {
+    position: absolute;
+    left: 9px;
+    top: 28px;
+    bottom: 0;
+    width: 2px;
+    background: var(--border);
+}
+
+.escrow__connector--done {
+    background: var(--success);
+}
+
+.escrow__ms-icon {
+    width: 20px;
+    flex-shrink: 0;
+    padding-top: 2px;
+}
+
+.escrow__ms-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.escrow__ms-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-xs);
+}
+
+.escrow__ms-top h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.escrow__ms--paid .escrow__ms-top h4 {
+    color: var(--success);
+}
+
+.escrow__ms--verified .escrow__ms-top h4 {
+    color: var(--info);
+}
+
+.escrow__ms--pending .escrow__ms-top h4 {
+    color: var(--text-muted);
+}
+
+.escrow__ms-desc {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: var(--space-sm);
+}
+
+.escrow__ms-bottom {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+}
+
+.escrow__ms-amount {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.escrow__ms-photo-badge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.75rem;
+    color: var(--success);
+    font-weight: 500;
+}

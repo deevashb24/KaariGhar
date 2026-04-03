@@ -1,0 +1,23 @@
+.orders-page {
+    padding: var(--space-2xl) 0 var(--space-4xl);
+}
+
+.orders-section {
+    margin-bottom: var(--space-3xl);
+}
+
+.orders-section__title {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    margin-bottom: var(--space-xs);
+}
+
+.orders-section__subtitle {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-xl);
+}
+
+.orders-section__grid {
+    display: grid;
+    gap: var(--space-lg);
+}

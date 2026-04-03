@@ -1,0 +1,18 @@
+/* App-level overrides for mobile center button */
+.mobile-nav__center-btn {
+  width: 52px !important;
+  height: 52px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, var(--gold), var(--gold-dark)) !important;
+  color: var(--text-inverse) !important;
+  margin-top: -20px;
+  box-shadow: 0 4px 16px rgba(212, 168, 85, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-nav__center-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 24px rgba(212, 168, 85, 0.5);
+}
