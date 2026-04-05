@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id              String      @id @default(uuid())
+  email           String      @unique
+  passwordHash    String
+  name            String
+  role            String      // 'CUSTOMER' or 'MAKER'
+  profileDetails  String?     // Can store JSON string of maker details
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  requests        Request[]   @relation("CustomerRequests")
+  quotes          Quote[]     @relation("MakerQuotes")
+  sentMessages    Message[]   @relation("SentMessages")
+  receivedMessages Message[]  @relation("ReceivedMessages")
+}
+
+model Request {
+  id              String      @id @default(uuid())
+  customerId      String
+  customer        User        @relation("CustomerRequests", fields: [customerId], references: [id])
+  title           String
+  description     String
+  budget          Float?
+  status          String      @default("OPEN") // OPEN, QUOTED, IN_PROGRESS, COMPLETED
+  images          String?     // JSON array of image URLs
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  quotes          Quote[]
+}
+
+model Quote {
+  id              String      @id @default(uuid())
+  requestId       String
+  request         Request     @relation(fields: [requestId], references: [id])
+  makerId         String
+  maker           User        @relation("MakerQuotes", fields: [makerId], references: [id])
+  price           Float
+  message         String
+  proposedTimeline String?
+  status          String      @default("PENDING") // PENDING, ACCEPTED, REJECTED
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  order           Order?
+}
+
+model Order {
+  id              String      @id @default(uuid())
+  quoteId         String      @unique
+  quote           Quote       @relation(fields: [quoteId], references: [id])
+  status          String      @default("IN_PROGRESS") // IN_PROGRESS, COMPLETED
+  totalPrice      Float
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  milestones      Milestone[]
+}
+
+model Milestone {
+  id              String      @id @default(uuid())
+  orderId         String
+  order           Order       @relation(fields: [orderId], references: [id])
+  title           String
+  description     String
+  amount          Float
+  status          String      @default("PENDING") // PENDING, COMPLETED, PAID
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+model Message {
+  id              String      @id @default(uuid())
+  senderId        String
+  sender          User        @relation("SentMessages", fields: [senderId], references: [id])
+  receiverId      String
+  receiver        User        @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  content         String
+  timestamp       DateTime    @default(now())
+  read            Boolean     @default(false)
+}
