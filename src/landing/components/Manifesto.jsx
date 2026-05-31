@@ -6,109 +6,187 @@ gsap.registerPlugin(ScrollTrigger);
 
 const PILLARS = [
   {
-    number: '01',
+    no: '01',
     title: 'Material Honesty',
-    description:
-      'We never clad, never fake, never obscure. Every surface you touch is what it claims to be — limestone, timber, hand-cast iron — present in its full, unmediated character.',
+    desc: 'We never clad, never fake. Every surface you touch is what it claims — limestone, timber, iron — present in its full, unmediated character.',
   },
   {
-    number: '02',
+    no: '02',
     title: 'Slow Architecture',
-    description:
-      'We reject the disposable. Our spaces are conceived to be inhabited across generations — designed with the same patience as the forests that grew the wood we select.',
+    desc: 'Our spaces are conceived to be inhabited across generations. Designed with the same patience as the forests that grew the wood we select.',
   },
   {
-    number: '03',
+    no: '03',
     title: 'The Artisan Alliance',
-    description:
-      'Every project partners with master craftspeople — weavers, stone-cutters, plaster workers — whose knowledge lives in the hands. We are translators of ancient skills for contemporary lives.',
+    desc: 'Every project partners with master craftspeople whose knowledge lives in the hands — weavers, stone-cutters, plaster workers.',
   },
   {
-    number: '04',
+    no: '04',
     title: 'Light as Architecture',
-    description:
-      'We design not just the room but how daylight will move through it across all seasons. Shadow is not absence — it is the counterpart that gives meaning to illumination.',
+    desc: 'We design not just the room but how daylight moves through it across all seasons. Shadow is the counterpart that gives meaning to illumination.',
   },
 ];
 
 export default function Manifesto() {
   const sectionRef = useRef(null);
+  const quoteRef   = useRef(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.fromTo(
-        '.pillar-card',
-        { opacity: 0, y: 30 },
+      // Header
+      gsap.fromTo('.manifesto-header > *',
+        { opacity: 0, y: 32 },
         {
-          opacity: 1,
-          y: 0,
-          duration: 0.8,
-          stagger: 0.15,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: 'top 70%',
-          },
+          opacity: 1, y: 0,
+          stagger: 0.12, duration: 0.9, ease: 'power3.out',
+          scrollTrigger: { trigger: '.manifesto-header', start: 'top 78%' },
         }
       );
+
+      // Pillars
+      gsap.fromTo('.pillar',
+        { opacity: 0, y: 48 },
+        {
+          opacity: 1, y: 0,
+          stagger: 0.1, duration: 0.85, ease: 'power3.out',
+          scrollTrigger: { trigger: '.pillars-grid', start: 'top 75%' },
+        }
+      );
+
+      // Quote word-by-word reveal (split by spaces)
+      const words = quoteRef.current?.querySelectorAll('.word');
+      if (words?.length) {
+        gsap.fromTo(words,
+          { opacity: 0.15 },
+          {
+            opacity: 1,
+            stagger: 0.04,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: quoteRef.current,
+              start: 'top 75%',
+              end:   'bottom 50%',
+              scrub: 0.8,
+            },
+          }
+        );
+      }
     }, sectionRef);
     return () => ctx.revert();
   }, []);
+
+  // Split quote into word spans for scrubbed reveal
+  const QUOTE = "A space should outlive its architect, outlast its owners, and reveal new dimensions to every generation that inhabits it.";
+  const words = QUOTE.split(' ');
 
   return (
     <section
       id="manifesto"
       ref={sectionRef}
-      className="bg-[hsl(var(--bg))] py-24 md:py-32 overflow-hidden"
+      className="section-pad overflow-hidden"
+      style={{ background: 'hsl(var(--bg))' }}
     >
-      <div className="max-w-[1400px] mx-auto px-6">
-        {/* Header */}
-        <div className="mb-16 max-w-xl">
-          <p className="text-xs text-[hsl(var(--muted))] uppercase tracking-[0.35em] mb-4">
-            Our Philosophy
+      <div className="container">
+
+        {/* ── Section header ── */}
+        <div className="manifesto-header flex flex-col md:flex-row md:items-end md:justify-between gap-10 mb-24">
+          <div>
+            <p className="eyebrow mb-5 opacity-0">Our Philosophy</p>
+            <h2 className="display-xl opacity-0" style={{ color: 'hsl(var(--text))' }}>
+              The Four<br />
+              <em style={{ color: 'var(--grad-a)' }}>Tenets</em>
+            </h2>
+          </div>
+          <p className="body-lg max-w-xs pb-1 opacity-0">
+            Not rules but convictions. Each one forged over a decade of
+            honest engagement with space and material.
           </p>
-          <h2 className="font-display italic text-4xl md:text-5xl text-[hsl(var(--text))] leading-tight">
-            The Four Tenets
-          </h2>
         </div>
 
-        {/* Pillar cards — horizontal scroll on mobile, grid on desktop */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-px border border-[hsl(var(--stroke))]">
-          {PILLARS.map((pillar) => (
+        {/* ── Pillars grid ── */}
+        <div
+          className="pillars-grid grid grid-cols-1 md:grid-cols-2 gap-px mb-32"
+          style={{ background: 'hsl(var(--stroke))' }}
+        >
+          {PILLARS.map((p) => (
             <div
-              key={pillar.number}
-              className="pillar-card group flex items-start gap-6 p-8 md:p-10
-                bg-[hsl(var(--surface))]/30 hover:bg-[hsl(var(--surface))]
-                border-[hsl(var(--stroke))]
-                transition-all duration-400 cursor-default opacity-0"
+              key={p.no}
+              className="pillar group flex gap-8 p-10 xl:p-14 opacity-0
+                transition-colors duration-300 cursor-default"
+              style={{ background: 'hsl(var(--bg))' }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'hsl(var(--surface))';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'hsl(var(--bg))';
+              }}
+              data-cursor-hover
             >
               {/* Number */}
-              <span className="font-display italic text-4xl text-[hsl(var(--stroke))] group-hover:text-[#8AAFD4] transition-colors duration-300 shrink-0 leading-none mt-1">
-                {pillar.number}
+              <span
+                className="shrink-0 mt-0.5 transition-colors duration-300"
+                style={{
+                  fontFamily: 'Instrument Serif, serif',
+                  fontSize: 'clamp(2rem, 3vw, 2.5rem)',
+                  fontStyle: 'italic',
+                  lineHeight: 1,
+                  color: 'hsl(var(--stroke))',
+                }}
+                data-no={p.no}
+              >
+                {p.no}
               </span>
 
               <div>
-                <h3 className="font-body font-medium text-sm uppercase tracking-[0.15em] text-[hsl(var(--text))] mb-3">
-                  {pillar.title}
+                <h3
+                  className="text-sm font-semibold uppercase tracking-[0.18em] mb-4
+                    transition-colors duration-300"
+                  style={{ color: 'hsl(var(--text))' }}
+                >
+                  {p.title}
                 </h3>
-                <p className="text-sm text-[hsl(var(--muted))] leading-relaxed">
-                  {pillar.description}
+                <p className="body-lg" style={{ maxWidth: '30ch' }}>
+                  {p.desc}
                 </p>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Quote block */}
-        <div className="mt-20 border-l-2 border-[#8AAFD4] pl-8 max-w-2xl">
-          <blockquote className="font-display italic text-2xl md:text-3xl text-[hsl(var(--text))]/80 leading-relaxed">
-            "A space should outlive its architect, outlast its owners,
-            and reveal new dimensions to every generation that inhabits it."
+        {/* ── Scroll-reveal quote ── */}
+        <div
+          ref={quoteRef}
+          className="max-w-4xl mx-auto text-center py-8"
+        >
+          <div
+            className="mb-8 mx-auto"
+            style={{
+              width: '1px', height: '60px',
+              background: 'linear-gradient(to bottom, hsl(var(--stroke)), transparent)',
+            }}
+          />
+          <blockquote
+            className="display-lg mb-8 leading-relaxed"
+            style={{ color: 'hsl(var(--text))', maxWidth: '34ch', margin: '0 auto 2rem' }}
+          >
+            {words.map((w, i) => (
+              <span key={i} className="word inline-block mr-[0.35em]">
+                {w}
+              </span>
+            ))}
           </blockquote>
-          <cite className="block mt-4 text-xs text-[hsl(var(--muted))] uppercase tracking-[0.25em] not-italic">
-            — KaariGhar Design Manifesto
+          <cite className="eyebrow not-italic" style={{ color: 'hsl(var(--faint))' }}>
+            — KaariGhar Design Manifesto, 2024
           </cite>
+          <div
+            className="mt-8 mx-auto"
+            style={{
+              width: '1px', height: '60px',
+              background: 'linear-gradient(to top, hsl(var(--stroke)), transparent)',
+            }}
+          />
         </div>
+
       </div>
     </section>
   );

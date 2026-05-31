@@ -1,99 +1,181 @@
-import HlsVideo from './HlsVideo';
+import { useEffect, useRef } from 'react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import Hls from 'hls.js';
+
+gsap.registerPlugin(ScrollTrigger);
+
+const HLS_SRC = 'https://stream.mux.com/Aa02T7oM1wH5Mk5EEVDYhbZ1ChcdhRsS2m1NYyx4Ua1g.m3u8';
 
 const SOCIALS = [
   { label: 'Instagram', href: 'https://instagram.com/kaarighar' },
-  { label: 'Pinterest', href: 'https://pinterest.com/kaarighar' },
-  { label: 'LinkedIn', href: 'https://linkedin.com/company/kaarighar' },
+  { label: 'Pinterest',  href: 'https://pinterest.com/kaarighar' },
+  { label: 'LinkedIn',   href: 'https://linkedin.com/company/kaarighar' },
 ];
 
 export default function ContactFooter() {
+  const sectionRef = useRef(null);
+  const videoRef   = useRef(null);
+
+  /* ── HLS video ── */
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (Hls.isSupported()) {
+      const hls = new Hls({ autoStartLoad: true });
+      hls.loadSource(HLS_SRC);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED, () => video.play().catch(() => {}));
+      return () => hls.destroy();
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = HLS_SRC;
+      video.play().catch(() => {});
+    }
+  }, []);
+
+  /* ── Entrance animations ── */
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.fromTo('.footer-reveal',
+        { opacity: 0, y: 48 },
+        {
+          opacity: 1, y: 0,
+          stagger: 0.12, duration: 1.1, ease: 'power3.out',
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: 'top 72%',
+          },
+        }
+      );
+    }, sectionRef);
+    return () => ctx.revert();
+  }, []);
+
   return (
     <footer
       id="contact"
-      className="relative bg-[hsl(var(--bg))] pt-24 pb-12 overflow-hidden border-t border-[hsl(var(--stroke))]"
+      ref={sectionRef}
+      className="relative overflow-hidden border-t"
+      style={{ background: 'hsl(var(--bg))', borderColor: 'hsl(var(--stroke))' }}
     >
-      {/* Background video — flipped vertically */}
+      {/* ── Flipped background video ── */}
       <div className="absolute inset-0 z-0 overflow-hidden">
-        <HlsVideo
-          className="w-full h-full object-cover"
-          flipped={true}
+        <video
+          ref={videoRef}
+          muted
+          loop
+          playsInline
+          className="video-cover"
+          style={{ transform: 'scaleY(-1)' }}
         />
-        <div className="absolute inset-0 bg-black/75" />
-        <div className="absolute inset-0 bg-gradient-to-b from-[hsl(var(--bg))] via-transparent to-[hsl(var(--bg))]" />
+        {/* Heavy overlay */}
+        <div className="absolute inset-0 bg-black/78" />
+        {/* Top fade from bg */}
+        <div
+          className="absolute top-0 left-0 right-0 h-48 pointer-events-none"
+          style={{ background: 'linear-gradient(to bottom, hsl(var(--bg)), transparent)' }}
+        />
+        {/* Bottom fade to bg */}
+        <div
+          className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none"
+          style={{ background: 'linear-gradient(to top, hsl(var(--bg)), transparent)' }}
+        />
       </div>
 
-      {/* Content */}
-      <div className="relative z-10 max-w-[1400px] mx-auto px-6">
-        {/* CTA heading */}
-        <div className="text-center mb-16 max-w-3xl mx-auto">
-          <p className="text-xs text-[hsl(var(--muted))] uppercase tracking-[0.35em] mb-6">
+      {/* ── Content ── */}
+      <div className="relative z-10 container section-pad">
+
+        {/* CTA block */}
+        <div className="text-center mb-28">
+          <p className="footer-reveal eyebrow mb-8 opacity-0">
             Begin Something Enduring
           </p>
-          <h2 className="font-display italic text-5xl md:text-7xl lg:text-8xl text-[hsl(var(--text))] leading-[0.95] mb-10">
+
+          <h2
+            className="footer-reveal display-hero mb-10 opacity-0"
+            style={{ color: 'hsl(var(--text))' }}
+          >
             Begin your<br />
-            <span style={{ color: '#8AAFD4' }}>journey.</span>
+            <em style={{ color: 'var(--grad-a)' }}>journey.</em>
           </h2>
-          <p className="text-sm text-[hsl(var(--muted))] max-w-sm mx-auto mb-10 leading-relaxed">
+
+          <p className="footer-reveal body-lg max-w-sm mx-auto mb-14 opacity-0">
             Every extraordinary space begins with a single conversation.
             Tell us about your vision and we will answer with possibility.
           </p>
 
-          {/* Email button */}
-          <a
-            href="mailto:contact@kaarighar.com"
-            className="group relative inline-flex items-center gap-3 px-10 py-5 rounded-full
-              text-sm font-medium uppercase tracking-[0.15em] text-[hsl(var(--text))]
-              border border-white/15 hover:border-transparent
-              transition-all duration-400 hover:shadow-[0_0_40px_rgba(138,175,212,0.25)]"
-          >
-            {/* Gradient border on hover */}
-            <span
-              className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-400 pointer-events-none"
+          {/* Email pill */}
+          <div className="footer-reveal opacity-0">
+            <a
+              href="mailto:contact@kaarighar.com"
+              className="group grad-border relative inline-flex items-center gap-3
+                px-10 py-5 rounded-full border text-sm font-medium uppercase tracking-[0.2em]
+                transition-all duration-400 hover:shadow-[0_0_50px_rgba(138,175,212,0.2)]"
               style={{
-                background: 'linear-gradient(90deg, #8AAFD4, #4E85BF)',
-                padding: '1px',
-                WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-                WebkitMaskComposite: 'xor',
-                maskComposite: 'exclude',
+                color: 'hsl(var(--text))',
+                borderColor: 'rgba(255,255,255,0.12)',
               }}
-            />
-            <span>contact@kaarighar.com</span>
-            <span className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 text-base">
-              ↗
-            </span>
-          </a>
+              data-cursor-hover
+            >
+              <span>contact@kaarighar.com</span>
+              <span
+                className="text-base transition-transform duration-200
+                  group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+              >
+                ↗
+              </span>
+            </a>
+          </div>
         </div>
 
         {/* Divider */}
-        <div className="h-px bg-[hsl(var(--stroke))] mb-10" />
+        <div className="hr-subtle mb-10" />
 
         {/* Footer bar */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-8">
           {/* Brand */}
           <div className="flex items-center gap-3">
-            <span className="font-display italic text-lg text-[hsl(var(--text))]">KaariGhar</span>
-            <span className="text-[hsl(var(--stroke))]">·</span>
-            <span className="text-xs text-[hsl(var(--muted))]">© 2024</span>
+            <span
+              style={{
+                fontFamily: 'Instrument Serif, serif',
+                fontStyle: 'italic',
+                fontSize: '1.25rem',
+                color: 'hsl(var(--text))',
+              }}
+            >
+              KaariGhar
+            </span>
+            <span style={{ color: 'hsl(var(--faint))' }}>·</span>
+            <span className="eyebrow">© 2024</span>
           </div>
 
-          {/* Commission status */}
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 pulse-dot" />
-            <span className="text-xs text-[hsl(var(--muted))] uppercase tracking-[0.2em]">
+          {/* Status */}
+          <div className="flex items-center gap-2.5">
+            <span
+              className="w-2 h-2 rounded-full"
+              style={{
+                background: '#34D399',
+                animation: 'pulse-ring 2.5s ease-in-out infinite',
+                display: 'block',
+              }}
+            />
+            <span className="eyebrow" style={{ color: 'hsl(var(--muted))' }}>
               Currently accepting commissions
             </span>
           </div>
 
-          {/* Social links */}
-          <div className="flex items-center gap-6">
+          {/* Socials */}
+          <div className="flex items-center gap-8">
             {SOCIALS.map((s) => (
               <a
                 key={s.label}
                 href={s.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs text-[hsl(var(--muted))] uppercase tracking-[0.15em]
-                  hover:text-[hsl(var(--text))] transition-colors duration-200"
+                className="eyebrow transition-colors duration-200"
+                style={{ color: 'hsl(var(--faint))' }}
+                onMouseEnter={(e) => e.currentTarget.style.color = 'hsl(var(--text))'}
+                onMouseLeave={(e) => e.currentTarget.style.color = 'hsl(var(--faint))'}
               >
                 {s.label}
               </a>

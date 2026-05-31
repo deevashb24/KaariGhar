@@ -4,128 +4,164 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const COLUMN_1 = [
-  { src: '/material_1.png', label: 'Travertine' },
-  { src: '/material_2.png', label: 'Aged Brass' },
-  { src: '/material_3.png', label: 'Lime Plaster' },
+const MATERIALS = [
+  { src: '/material_1.png', name: 'Travertine',       origin: 'Rajasthan Quarries' },
+  { src: '/material_2.png', name: 'Aged Brass',        origin: 'Moradabad Foundries' },
+  { src: '/material_3.png', name: 'Lime Plaster',      origin: 'Jaisalmer Tradition' },
+  { src: '/material_4.png', name: 'Raw Linen',         origin: 'Kutch Weavers' },
+  { src: '/material_5.png', name: 'Blackened Steel',   origin: 'Howrah Forge' },
+  { src: '/material_6.png', name: 'Dark Basalt',       origin: 'Deccan Plateau' },
 ];
-
-const COLUMN_2 = [
-  { src: '/material_4.png', label: 'Raw Linen' },
-  { src: '/material_5.png', label: 'Blackened Steel' },
-  { src: '/material_6.png', label: 'Dark Basalt' },
-];
-
-function ParallaxColumn({ items, ySpeed, side }) {
-  const colRef = useRef(null);
-
-  useEffect(() => {
-    const el = colRef.current;
-    const ctx = gsap.context(() => {
-      gsap.to(el, {
-        yPercent: ySpeed,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: el.closest('section'),
-          start: 'top bottom',
-          end: 'bottom top',
-          scrub: 1.5,
-        },
-      });
-    }, el);
-    return () => ctx.revert();
-  }, [ySpeed]);
-
-  return (
-    <div
-      ref={colRef}
-      className={`flex flex-col gap-6 ${side === 'right' ? 'mt-32' : ''}`}
-    >
-      {items.map((item, i) => (
-        <div key={i} className="group relative overflow-hidden rounded-sm">
-          <img
-            src={item.src}
-            alt={item.label}
-            className="w-full aspect-[3/4] object-cover transition-transform duration-700 group-hover:scale-105"
-            loading="lazy"
-          />
-          {/* Material label on hover */}
-          <div className="absolute inset-0 flex items-end p-5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-t from-black/70 to-transparent">
-            <div className="flex items-center gap-3">
-              <div className="w-3 h-px accent-gradient" />
-              <span className="text-xs text-white/80 uppercase tracking-[0.25em]">{item.label}</span>
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
 
 export default function MaterialsGallery() {
-  const sectionRef = useRef(null);
-  const pinnedRef = useRef(null);
+  const sectionRef  = useRef(null);
+  const pinnedRef   = useRef(null);
+  const colLeftRef  = useRef(null);
+  const colRightRef = useRef(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Animate pinned text in
-      gsap.fromTo(
-        '.palette-heading',
-        { opacity: 0, y: 30 },
+      // Pinned heading reveal
+      gsap.fromTo(pinnedRef.current.querySelectorAll('.pin-reveal'),
+        { opacity: 0, y: 40 },
         {
-          opacity: 1,
-          y: 0,
-          duration: 1,
-          ease: 'power3.out',
+          opacity: 1, y: 0,
+          duration: 1, stagger: 0.12, ease: 'power3.out',
           scrollTrigger: {
             trigger: pinnedRef.current,
-            start: 'top 70%',
+            start: 'top 65%',
           },
         }
       );
+
+      // Left column scrolls up faster (pull-up)
+      gsap.to(colLeftRef.current, {
+        yPercent: -22,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: 'top bottom',
+          end:   'bottom top',
+          scrub: 1.8,
+        },
+      });
+
+      // Right column scrolls down slower (push-down)
+      gsap.to(colRightRef.current, {
+        yPercent: 12,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: 'top bottom',
+          end:   'bottom top',
+          scrub: 1.8,
+        },
+      });
     }, sectionRef);
     return () => ctx.revert();
   }, []);
+
+  const left  = MATERIALS.slice(0, 3);
+  const right = MATERIALS.slice(3, 6);
 
   return (
     <section
       id="materials"
       ref={sectionRef}
-      className="relative min-h-[250vh] bg-[hsl(var(--bg))]"
+      className="relative overflow-hidden"
+      style={{
+        minHeight: '240vh',
+        background: 'hsl(var(--bg))',
+      }}
     >
-      {/* Pinned Center Text */}
+      {/* ── Sticky pinned center text ── */}
       <div
         ref={pinnedRef}
-        className="sticky top-0 z-10 h-screen flex flex-col items-center justify-center text-center px-6 pointer-events-none"
+        className="sticky top-0 h-screen flex flex-col items-center justify-center text-center px-6 z-10 pointer-events-none"
       >
-        <p className="palette-heading text-xs text-[hsl(var(--muted))] uppercase tracking-[0.35em] mb-4 opacity-0">
-          Our Palette
-        </p>
-        <h2 className="palette-heading font-display text-5xl md:text-7xl text-[hsl(var(--text))] leading-tight opacity-0">
+        <p className="pin-reveal eyebrow mb-6 opacity-0">Our Palette</p>
+        <h2
+          className="pin-reveal display-xl mb-8 opacity-0"
+          style={{ color: 'hsl(var(--text))' }}
+        >
           Material{' '}
-          <em className="italic" style={{ color: '#8AAFD4' }}>truth</em>
+          <em style={{ color: 'var(--grad-a)' }}>truth</em>
         </h2>
-        <p className="palette-heading mt-6 text-sm text-[hsl(var(--muted))] max-w-xs leading-relaxed opacity-0">
-          We select every stone, textile and alloy for honesty.
-          What you see is what it is — unmasked, uncoated, enduring.
+        <p className="pin-reveal body-lg max-w-sm opacity-0">
+          We select every stone, textile and alloy for honesty — what you see
+          is what it is, unmasked, uncoated, enduring.
         </p>
+
+        {/* Decorative ring */}
+        <div
+          className="pin-reveal absolute inset-0 m-auto opacity-0 pointer-events-none"
+          style={{
+            width: '500px', height: '500px',
+            maxWidth: '80vw', maxHeight: '80vw',
+            borderRadius: '50%',
+            border: '1px solid rgba(255,255,255,0.04)',
+            zIndex: -1,
+          }}
+        />
+        <div
+          className="pin-reveal absolute inset-0 m-auto opacity-0 pointer-events-none"
+          style={{
+            width: '700px', height: '700px',
+            maxWidth: '100vw', maxHeight: '100vw',
+            borderRadius: '50%',
+            border: '1px solid rgba(255,255,255,0.03)',
+            zIndex: -1,
+          }}
+        />
       </div>
 
-      {/* Parallax columns — positioned absolutely over the sticky section */}
-      <div className="absolute inset-0 top-0 z-20 pointer-events-none">
-        <div className="sticky top-0 h-screen overflow-hidden">
-          <div className="absolute inset-0 flex items-start justify-between px-6 md:px-16 pt-16 max-w-[1400px] mx-auto left-0 right-0">
-            {/* Left column */}
-            <div className="w-[28vw] max-w-xs pointer-events-auto">
-              <ParallaxColumn items={COLUMN_1} ySpeed={-25} side="left" />
-            </div>
-            {/* Right column */}
-            <div className="w-[28vw] max-w-xs pointer-events-auto">
-              <ParallaxColumn items={COLUMN_2} ySpeed={15} side="right" />
-            </div>
+      {/* ── Parallax image columns ── */}
+      <div className="absolute inset-0 flex items-start justify-between px-6 md:px-16 pt-20 pointer-events-none z-20">
+        <div className="w-[27vw] max-w-[320px]" style={{ pointerEvents: 'auto' }}>
+          <div ref={colLeftRef} className="flex flex-col gap-6 mt-[10vh]">
+            {left.map((m, i) => (
+              <MaterialCard key={i} m={m} />
+            ))}
+          </div>
+        </div>
+
+        <div className="w-[27vw] max-w-[320px]" style={{ pointerEvents: 'auto' }}>
+          <div ref={colRightRef} className="flex flex-col gap-6 mt-[40vh]">
+            {right.map((m, i) => (
+              <MaterialCard key={i} m={m} />
+            ))}
           </div>
         </div>
       </div>
     </section>
+  );
+}
+
+function MaterialCard({ m }) {
+  return (
+    <div className="group relative img-zoom cursor-default" data-cursor-hover>
+      <img
+        src={m.src}
+        alt={m.name}
+        className="w-full aspect-[3/4] object-cover rounded-sm"
+        loading="lazy"
+      />
+      {/* Hover label */}
+      <div
+        className="absolute inset-x-0 bottom-0 p-5
+          translate-y-2 opacity-0 group-hover:opacity-100 group-hover:translate-y-0
+          transition-all duration-400 ease-out"
+        style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.75), transparent)' }}
+      >
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] mb-0.5"
+          style={{ color: 'hsl(var(--text))' }}
+        >
+          {m.name}
+        </p>
+        <p className="eyebrow" style={{ color: 'rgba(255,255,255,0.45)' }}>
+          {m.origin}
+        </p>
+      </div>
+    </div>
   );
 }

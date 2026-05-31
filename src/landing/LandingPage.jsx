@@ -1,13 +1,60 @@
 import { useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
-import '../landing/index.css';
-import LoadingScreen from '../landing/components/LoadingScreen';
-import Navbar from '../landing/components/Navbar';
-import Hero from '../landing/components/Hero';
-import EditorialSpaces from '../landing/components/EditorialSpaces';
-import MaterialsGallery from '../landing/components/MaterialsGallery';
-import Manifesto from '../landing/components/Manifesto';
-import ContactFooter from '../landing/components/ContactFooter';
+import './index.css';
+
+// Hooks
+import { useSmoothScroll } from './hooks/useSmoothScroll';
+
+// Components
+import CustomCursor     from './components/CustomCursor';
+import LoadingScreen    from './components/LoadingScreen';
+import Navbar           from './components/Navbar';
+import Hero             from './components/Hero';
+import Marquee          from './components/Marquee';
+import StatsSection     from './components/StatsSection';
+import EditorialSpaces  from './components/EditorialSpaces';
+import MaterialsGallery from './components/MaterialsGallery';
+import Manifesto        from './components/Manifesto';
+import ProcessSection   from './components/ProcessSection';
+import ContactFooter    from './components/ContactFooter';
+
+const TICKER_ITEMS = [
+  'Interior Architecture',
+  'Material Truth',
+  'Bespoke Craftsmanship',
+  'Handmade Objects',
+  'Slow Design',
+  'Heritage & Craft',
+  'Artisan Alliance',
+  'Light as Architecture',
+];
+
+function AppShell() {
+  useSmoothScroll();
+
+  return (
+    <div
+      className="grain-overlay"
+      style={{ background: 'hsl(var(--bg))', color: 'hsl(var(--text))', minHeight: '100vh' }}
+    >
+      <CustomCursor />
+      <Navbar />
+
+      <main>
+        <Hero />
+        <Marquee items={TICKER_ITEMS} />
+        <StatsSection />
+        <Marquee items={TICKER_ITEMS} direction="right" />
+        <EditorialSpaces />
+        <MaterialsGallery />
+        <Manifesto />
+        <ProcessSection />
+      </main>
+
+      <ContactFooter />
+    </div>
+  );
+}
 
 export default function LandingPage() {
   const [isLoading, setIsLoading] = useState(true);
@@ -20,18 +67,7 @@ export default function LandingPage() {
         )}
       </AnimatePresence>
 
-      {!isLoading && (
-        <div className="min-h-screen bg-[hsl(var(--bg))] text-[hsl(var(--text))] font-body">
-          <Navbar />
-          <main>
-            <Hero />
-            <EditorialSpaces />
-            <MaterialsGallery />
-            <Manifesto />
-          </main>
-          <ContactFooter />
-        </div>
-      )}
+      {!isLoading && <AppShell />}
     </>
   );
 }

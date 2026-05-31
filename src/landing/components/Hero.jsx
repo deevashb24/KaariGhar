@@ -1,117 +1,277 @@
 import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { AnimatePresence, motion } from 'framer-motion';
-import HlsVideo from './HlsVideo';
+import Hls from 'hls.js';
+
+gsap.registerPlugin(ScrollTrigger);
+
+const HLS_SRC = 'https://stream.mux.com/Aa02T7oM1wH5Mk5EEVDYhbZ1ChcdhRsS2m1NYyx4Ua1g.m3u8';
 
 const ROLES = ['Artisans', 'Curators', 'Narrators', 'Architects'];
 
 export default function Hero() {
+  const sectionRef  = useRef(null);
+  const videoRef    = useRef(null);
+  const overlayRef  = useRef(null);
+  const headlineRef = useRef(null);
+  const subRef      = useRef(null);
+  const ctaRef      = useRef(null);
   const [roleIndex, setRoleIndex] = useState(0);
-  const heroRef = useRef(null);
 
+  /* ── HLS video init ── */
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+    const video = videoRef.current;
+    if (!video) return;
 
-      tl.fromTo('.name-reveal',
-        { opacity: 0, y: 50 },
-        { opacity: 1, y: 0, duration: 1.2, delay: 0.1 }
-      ).fromTo('.blur-in',
-        { opacity: 0, filter: 'blur(10px)', y: 20 },
-        { opacity: 1, filter: 'blur(0px)', y: 0, duration: 1, stagger: 0.1, delay: -0.8 }
-      );
-    }, heroRef);
+    if (Hls.isSupported()) {
+      const hls = new Hls({ autoStartLoad: true, lowLatencyMode: true });
+      hls.loadSource(HLS_SRC);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED, () => video.play().catch(() => {}));
+      return () => hls.destroy();
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = HLS_SRC;
+      video.play().catch(() => {});
+    }
+  }, []);
 
-    const roleTimer = setInterval(() => {
-      setRoleIndex((i) => (i + 1) % ROLES.length);
-    }, 2000);
+  /* ── Scroll-controlled video scrub & parallax ── */
+  useEffect(() => {
+    const section = sectionRef.current;
+    const video   = videoRef.current;
+    const overlay = overlayRef.current;
+    if (!section || !video) return;
+
+    // Parallax: video moves upward slower than scroll (parallax depth ~30%)
+    const parallaxTl = gsap.timeline({
+      scrollTrigger: {
+        trigger: section,
+        start: 'top top',
+        end: 'bottom top',
+        scrub: true,
+      },
+    });
+    parallaxTl.to(video, { yPercent: 20, ease: 'none' });
+
+    // Overlay darkens as user scrolls into content
+    parallaxTl.to(overlay, { opacity: 0.85, ease: 'none' }, 0);
+
+    // Scroll-drive video currentTime (when loaded)
+    const syncVideoTime = () => {
+      const st = ScrollTrigger.create({
+        trigger: section,
+        start: 'top top',
+        end: 'bottom top',
+        onUpdate: (self) => {
+          if (video.duration) {
+            video.currentTime = self.progress * (video.duration * 0.6);
+          }
+        },
+      });
+      return st;
+    };
+
+    const videoST = syncVideoTime();
+
+    // Headline scale down and fade out on scroll
+    gsap.fromTo(headlineRef.current,
+      { opacity: 1, scale: 1, y: 0 },
+      {
+        opacity: 0,
+        scale: 0.92,
+        y: -60,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: section,
+          start: 'top top',
+          end: '40% top',
+          scrub: true,
+        },
+      }
+    );
 
     return () => {
-      ctx.revert();
-      clearInterval(roleTimer);
+      parallaxTl.scrollTrigger?.kill();
+      videoST?.kill();
+      ScrollTrigger.getAll().forEach(t => t.kill());
     };
+  }, []);
+
+  /* ── GSAP entrance ── */
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({
+        delay: 0.15,
+        defaults: { ease: 'power4.out' },
+      });
+      tl.fromTo('.hero-eyebrow',
+        { opacity: 0, y: 24, filter: 'blur(6px)' },
+        { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1.1 }
+      )
+      .fromTo('.hero-name',
+        { opacity: 0, y: 70 },
+        { opacity: 1, y: 0, duration: 1.3 },
+        '-=0.7'
+      )
+      .fromTo('.hero-role-line',
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 0.9 },
+        '-=0.9'
+      )
+      .fromTo('.hero-desc',
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.8 },
+        '-=0.7'
+      )
+      .fromTo('.hero-ctas',
+        { opacity: 0, y: 16 },
+        { opacity: 1, y: 0, duration: 0.7 },
+        '-=0.6'
+      )
+      .fromTo('.hero-scroll',
+        { opacity: 0 },
+        { opacity: 1, duration: 0.6 },
+        '-=0.3'
+      );
+    }, sectionRef);
+    return () => ctx.revert();
+  }, []);
+
+  /* ── Role cycling ── */
+  useEffect(() => {
+    const t = setInterval(() => setRoleIndex(i => (i + 1) % ROLES.length), 2200);
+    return () => clearInterval(t);
   }, []);
 
   return (
     <section
       id="home"
-      ref={heroRef}
-      className="relative w-full h-screen flex flex-col items-center justify-center overflow-hidden video-grain"
+      ref={sectionRef}
+      className="relative h-screen overflow-hidden flex flex-col"
     >
-      {/* HLS Background Video */}
-      <HlsVideo className="absolute inset-0 w-full h-full object-cover" />
+      {/* ── Video background ── */}
+      <div className="absolute inset-0 overflow-hidden">
+        <video
+          ref={videoRef}
+          muted
+          loop
+          playsInline
+          className="video-cover will-change-transform"
+        />
+      </div>
 
-      {/* Overlays */}
-      <div className="absolute inset-0 bg-black/45 z-[1]" />
-      <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-[hsl(var(--bg))] to-transparent z-[2]" />
+      {/* ── Overlays ── */}
+      <div ref={overlayRef} className="absolute inset-0 bg-black/40 z-[1]" />
+      {/* Vignette edges */}
+      <div className="absolute inset-0 z-[2] pointer-events-none"
+        style={{
+          background: 'radial-gradient(ellipse 80% 60% at 50% 50%, transparent 40%, rgba(10,10,10,0.6) 100%)'
+        }}
+      />
+      {/* Bottom fade to bg */}
+      <div
+        className="absolute bottom-0 left-0 right-0 z-[3] pointer-events-none"
+        style={{ height: '35vh', background: 'linear-gradient(to top, hsl(var(--bg)) 0%, transparent 100%)' }}
+      />
 
-      {/* Hero Content */}
-      <div className="relative z-[3] text-center px-6 max-w-4xl mx-auto">
-
+      {/* ── Hero content ── */}
+      <div
+        ref={headlineRef}
+        className="relative z-[4] flex-1 flex flex-col items-center justify-center text-center px-6"
+        style={{ paddingTop: '80px' }}
+      >
         {/* Eyebrow */}
-        <p className="blur-in text-xs text-[hsl(var(--muted))] uppercase tracking-[0.4em] mb-8">
-          Heritage &amp; Craft — Est. 2024
-        </p>
+        <div className="hero-eyebrow flex items-center gap-4 mb-10 opacity-0">
+          <div className="w-8 h-px accent-gradient" />
+          <span className="eyebrow" style={{ color: 'rgba(255,255,255,0.55)' }}>
+            Heritage &amp; Craft — Est. 2024
+          </span>
+          <div className="w-8 h-px accent-gradient" />
+        </div>
 
-        {/* Brand Name */}
-        <h1 className="name-reveal font-display italic text-6xl md:text-8xl lg:text-9xl leading-[0.9] tracking-tight text-[hsl(var(--text))] mb-6">
+        {/* Brand name */}
+        <h1 className="hero-name display-hero opacity-0 mb-6"
+          style={{ color: 'hsl(var(--text))' }}
+        >
           KaariGhar
         </h1>
 
-        {/* Dynamic Role Line */}
-        <div className="blur-in flex items-center justify-center gap-2 mb-6 text-lg md:text-xl text-[hsl(var(--muted))]">
-          <span>We are</span>
-          <span className="relative w-32 md:w-40 overflow-hidden inline-flex justify-center">
+        {/* Dynamic role */}
+        <div className="hero-role-line flex items-center justify-center gap-2 mb-8 opacity-0">
+          <span className="text-base md:text-lg font-light"
+            style={{ color: 'hsl(var(--muted))' }}
+          >
+            We are
+          </span>
+          <span
+            className="relative overflow-hidden"
+            style={{ minWidth: '8rem', display: 'inline-flex', justifyContent: 'center' }}
+          >
             <AnimatePresence mode="wait">
               <motion.span
                 key={roleIndex}
-                className="font-display italic text-[hsl(var(--text))]"
-                initial={{ y: 16, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: -16, opacity: 0 }}
-                transition={{ duration: 0.35, ease: 'easeInOut' }}
+                className="display-lg"
+                style={{ fontStyle: 'italic', color: 'hsl(var(--text))' }}
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0,  opacity: 1 }}
+                exit={{ y: -20,   opacity: 0 }}
+                transition={{ duration: 0.4, ease: [0.76, 0, 0.24, 1] }}
               >
                 {ROLES[roleIndex]}
               </motion.span>
             </AnimatePresence>
           </span>
-          <span>of space.</span>
+          <span className="text-base md:text-lg font-light"
+            style={{ color: 'hsl(var(--muted))' }}
+          >
+            of space.
+          </span>
         </div>
 
         {/* Description */}
-        <p className="blur-in text-sm md:text-base text-[hsl(var(--muted))] max-w-md mx-auto mb-12 leading-relaxed">
-          Every room we conceive is a conversation between material and memory.
+        <p className="hero-desc body-lg max-w-md mb-12 opacity-0">
+          Every room we conceive is a dialogue between material and memory.
           We build spaces that do not merely shelter — they resonate.
         </p>
 
-        {/* CTA Buttons */}
-        <div className="blur-in flex flex-col sm:flex-row items-center justify-center gap-4">
+        {/* CTA row */}
+        <div className="hero-ctas flex flex-col sm:flex-row items-center gap-4 opacity-0">
           <a
             href="#spaces"
-            className="group relative px-8 py-4 rounded-full text-sm font-medium tracking-[0.1em] uppercase
-              text-[hsl(var(--bg))] accent-gradient overflow-hidden
-              transition-all duration-300 hover:shadow-[0_0_30px_rgba(138,175,212,0.35)]"
+            className="btn-magnetic accent-gradient text-white px-8 py-4 rounded-full
+              text-xs font-semibold uppercase tracking-[0.2em]
+              hover:shadow-[0_0_40px_rgba(138,175,212,0.4)] transition-shadow duration-400"
           >
-            <span className="relative z-10">Explore Collections</span>
+            Explore Collections
           </a>
           <a
             href="#materials"
-            className="group px-8 py-4 rounded-full text-sm font-medium tracking-[0.1em] uppercase
-              text-[hsl(var(--text))] border border-white/20
-              hover:border-[#8AAFD4] transition-all duration-300
-              hover:shadow-[0_0_20px_rgba(138,175,212,0.15)]"
+            className="btn-magnetic grad-border px-8 py-4 rounded-full
+              text-xs font-semibold uppercase tracking-[0.2em]
+              border transition-all duration-300"
+            style={{
+              color: 'hsl(var(--text))',
+              borderColor: 'rgba(255,255,255,0.15)',
+            }}
           >
             View Materials
           </a>
         </div>
       </div>
 
-      {/* Scroll indicator */}
-      <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-[3] flex flex-col items-center gap-2">
-        <span className="text-[10px] text-[hsl(var(--muted))] uppercase tracking-[0.3em]">Scroll</span>
-        <div className="relative w-px h-12 bg-[hsl(var(--stroke))] overflow-hidden rounded-full">
-          <div className="absolute top-0 left-0 right-0 h-4 accent-gradient scroll-indicator rounded-full" />
-        </div>
+      {/* ── Scroll cue ── */}
+      <div className="hero-scroll absolute bottom-10 left-1/2 -translate-x-1/2 z-[4]
+        flex flex-col items-center gap-3 opacity-0"
+      >
+        <span className="eyebrow" style={{ color: 'rgba(255,255,255,0.3)' }}>Scroll</span>
+        <div className="scroll-line" />
+      </div>
+
+      {/* ── Corner meta ── */}
+      <div className="absolute bottom-10 right-8 z-[4] hidden md:flex flex-col items-end gap-1">
+        <span className="eyebrow" style={{ color: 'rgba(255,255,255,0.25)' }}>New Delhi, India</span>
+        <span className="eyebrow" style={{ color: 'rgba(255,255,255,0.15)' }}>↗ 28°N 77°E</span>
       </div>
     </section>
   );

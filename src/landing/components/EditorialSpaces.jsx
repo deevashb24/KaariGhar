@@ -6,145 +6,214 @@ gsap.registerPlugin(ScrollTrigger);
 
 const BLOCKS = [
   {
-    id: 'block-1',
-    layout: 'image-left',
-    image: '/editorial_1.png',
-    eyebrow: 'The Living Space',
-    heading: 'The Art of\nPresence',
+    id: 'b1',
+    layout: 'img-left',
+    eyebrow: '01 — Living',
+    heading: 'The Art\nof Presence',
     body: 'We do not design rooms — we cultivate atmospheres. Each surface chosen for the story it carries, each proportion measured against the quality of light that will touch it at dusk. Material truth is our only compass.',
-    link: { label: 'View Living Collections', href: '#spaces' },
+    link: 'View Living Collection',
+    href: '#spaces',
+    image: '/editorial_1.png',
+    imageLabel: 'Concrete & Timber Residence, 2023',
   },
   {
-    id: 'block-2',
-    layout: 'text-left',
-    image: '/editorial_2.png',
-    eyebrow: 'Threshold & Passage',
+    id: 'b2',
+    layout: 'img-right',
+    eyebrow: '02 — Threshold',
     heading: 'Where Light\nBecomes Form',
     body: 'A corridor is not merely passage — it is anticipation made architectural. We design the spaces between spaces with the same rigour we bring to the grand salon. In the threshold lives the soul of the home.',
-    link: { label: 'Explore Our Process', href: '#manifesto' },
+    link: 'Explore Our Process',
+    href: '#manifesto',
+    image: '/editorial_2.png',
+    imageLabel: 'Stone & Brass Corridor, Rajasthan 2022',
   },
   {
-    id: 'block-3',
-    layout: 'image-left',
-    image: '/editorial_3.png',
-    eyebrow: 'The Private Retreat',
+    id: 'b3',
+    layout: 'img-left',
+    eyebrow: '03 — Retreat',
     heading: 'Stillness,\nCrafted',
-    body: 'The bedroom is the first and last room of the day — a space that demands tenderness in every decision. Natural fibres, handmade objects, and the absence of excess. Rest as a considered act.',
-    link: { label: 'See Retreat Spaces', href: '#spaces' },
+    body: 'The bedroom is the first and last room of every day — a space demanding tenderness in every decision. Natural fibres, handmade objects, the deliberate absence of excess. Rest as a considered act.',
+    link: 'See Retreat Spaces',
+    href: '#spaces',
+    image: '/editorial_3.png',
+    imageLabel: 'Woven Linen Suite, Himachal 2024',
   },
 ];
 
-function EditorialBlock({ block, index }) {
-  const blockRef = useRef(null);
-  const isImageLeft = block.layout === 'image-left';
+function Block({ block, index }) {
+  const ref   = useRef(null);
+  const imgRef = useRef(null);
+  const txtRef = useRef(null);
+  const isLeft = block.layout === 'img-left';
 
   useEffect(() => {
-    const el = blockRef.current;
     const ctx = gsap.context(() => {
-      gsap.fromTo(
-        el,
-        { opacity: 0, y: 50 },
+      // Image slides in from its side
+      gsap.fromTo(imgRef.current,
+        { opacity: 0, x: isLeft ? -60 : 60, scale: 0.97 },
         {
-          opacity: 1,
-          y: 0,
-          duration: 1.1,
-          ease: 'power3.out',
+          opacity: 1, x: 0, scale: 1,
+          duration: 1.3, ease: 'power3.out',
           scrollTrigger: {
-            trigger: el,
-            start: 'top 80%',
-            toggleActions: 'play none none none',
+            trigger: ref.current,
+            start: 'top 72%',
           },
         }
       );
-    }, el);
+
+      // Text stagger
+      gsap.fromTo(txtRef.current.querySelectorAll('.txt-reveal'),
+        { opacity: 0, y: 36 },
+        {
+          opacity: 1, y: 0,
+          duration: 0.9, ease: 'power3.out',
+          stagger: 0.1,
+          scrollTrigger: {
+            trigger: ref.current,
+            start: 'top 68%',
+          },
+        }
+      );
+    }, ref);
     return () => ctx.revert();
-  }, []);
+  }, [isLeft]);
 
   return (
-    <div
-      ref={blockRef}
-      className={`group grid grid-cols-1 lg:grid-cols-2 gap-0 ${
-        isImageLeft ? '' : 'lg:[direction:rtl]'
-      }`}
-    >
-      {/* Image side */}
-      <div className="editorial-image aspect-[4/5] lg:aspect-auto lg:min-h-[600px] overflow-hidden relative">
+    <article ref={ref} className="grid grid-cols-1 lg:grid-cols-2 min-h-[85vh]">
+      {/* ── Image pane ── */}
+      <div
+        ref={imgRef}
+        className={`img-zoom relative overflow-hidden ${isLeft ? 'lg:order-first' : 'lg:order-last'}`}
+        style={{ minHeight: '55vw', maxHeight: '80vh', height: 'auto' }}
+        data-cursor-hover
+      >
         <img
           src={block.image}
           alt={block.eyebrow}
-          className="w-full h-full object-cover transition-transform duration-[800ms] ease-[cubic-bezier(0.25,0.46,0.45,0.94)] group-hover:scale-[1.04]"
+          className="absolute inset-0 w-full h-full object-cover"
           loading="lazy"
         />
-        {/* Image number */}
-        <div className="absolute top-6 left-6 text-[10px] text-white/40 uppercase tracking-[0.3em] font-body">
-          {String(index + 1).padStart(2, '0')} / {String(BLOCKS.length).padStart(2, '0')}
+        {/* Inner gradient at bottom of image */}
+        <div className="absolute inset-x-0 bottom-0 h-32 pointer-events-none"
+          style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.45), transparent)' }}
+        />
+        {/* Image caption */}
+        <div className="absolute bottom-6 left-6">
+          <span className="eyebrow" style={{ color: 'rgba(255,255,255,0.5)' }}>
+            {block.imageLabel}
+          </span>
+        </div>
+        {/* Index */}
+        <div className="absolute top-6 right-6">
+          <span
+            className="text-[10px] font-medium tabular-nums"
+            style={{ color: 'rgba(255,255,255,0.3)', letterSpacing: '0.2em' }}
+          >
+            {String(index + 1).padStart(2, '0')} / 03
+          </span>
         </div>
       </div>
 
-      {/* Text side */}
+      {/* ── Text pane ── */}
       <div
-        className={`flex flex-col justify-center px-10 py-16 lg:px-20 lg:py-24 bg-[hsl(var(--bg))] ${
-          isImageLeft ? '' : '[direction:ltr]'
+        ref={txtRef}
+        className={`flex flex-col justify-center px-10 py-20 lg:px-20 xl:px-28 ${
+          isLeft ? 'lg:order-last' : 'lg:order-first'
         }`}
+        style={{ background: 'hsl(var(--bg))' }}
       >
-        {/* Separator + eyebrow */}
-        <div className="flex items-center gap-4 mb-8">
-          <div className="w-8 h-px accent-gradient" />
-          <span className="text-xs text-[hsl(var(--muted))] uppercase tracking-[0.3em]">
-            {block.eyebrow}
-          </span>
+        {/* Eyebrow */}
+        <div className="txt-reveal flex items-center gap-4 mb-10 opacity-0">
+          <div className="w-10 h-px accent-gradient shrink-0" />
+          <span className="eyebrow">{block.eyebrow}</span>
         </div>
 
         {/* Heading */}
-        <h2 className="font-display italic text-4xl md:text-5xl xl:text-6xl leading-[1.05] text-[hsl(var(--text))] mb-8 whitespace-pre-line">
+        <h2
+          className="txt-reveal display-xl mb-10 opacity-0 whitespace-pre-line"
+          style={{ color: 'hsl(var(--text))' }}
+        >
           {block.heading}
         </h2>
 
-        {/* Body */}
-        <p className="text-sm md:text-base text-[hsl(var(--muted))] leading-relaxed mb-10 max-w-sm">
+        {/* Body copy */}
+        <p className="txt-reveal body-lg mb-12 max-w-sm opacity-0">
           {block.body}
         </p>
 
-        {/* Link */}
+        {/* Text link */}
         <a
-          href={block.link.href}
-          className="group/link inline-flex items-center gap-3 text-xs uppercase tracking-[0.2em] text-[hsl(var(--text))] hover:text-[#8AAFD4] transition-colors duration-300"
+          href={block.href}
+          className="txt-reveal group inline-flex items-center gap-4 opacity-0 w-fit"
+          style={{ color: 'hsl(var(--text))' }}
         >
-          <span>{block.link.label}</span>
-          <span className="w-6 h-px bg-current transition-all duration-300 group-hover/link:w-10" />
+          <span
+            className="text-xs font-semibold uppercase tracking-[0.22em] transition-colors duration-300 group-hover:text-[var(--grad-a)]"
+          >
+            {block.link}
+          </span>
+          <span
+            className="h-px transition-all duration-400 group-hover:w-14"
+            style={{ width: '2.5rem', background: 'currentColor' }}
+          />
         </a>
       </div>
-    </div>
+    </article>
   );
 }
 
 export default function EditorialSpaces() {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.fromTo('.editorial-header > *',
+        { opacity: 0, y: 32 },
+        {
+          opacity: 1, y: 0,
+          duration: 1, stagger: 0.12, ease: 'power3.out',
+          scrollTrigger: {
+            trigger: '.editorial-header',
+            start: 'top 80%',
+          },
+        }
+      );
+    }, ref);
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <section id="spaces" className="bg-[hsl(var(--bg))] py-24 md:py-32 overflow-hidden">
+    <section id="spaces" ref={ref} style={{ background: 'hsl(var(--bg))' }}>
       {/* Section header */}
-      <div className="max-w-[1400px] mx-auto px-6 mb-20">
-        <div className="flex items-end justify-between flex-wrap gap-6">
+      <div className="container section-pad">
+        <div className="editorial-header flex flex-col md:flex-row md:items-end md:justify-between gap-8">
           <div>
-            <p className="text-xs text-[hsl(var(--muted))] uppercase tracking-[0.35em] mb-4">
-              Our Collections
-            </p>
-            <h2 className="font-display italic text-3xl md:text-4xl text-[hsl(var(--text))]">
-              The Spaces We Build
+            <p className="eyebrow mb-5 opacity-0">Our Collections</p>
+            <h2 className="display-xl opacity-0" style={{ color: 'hsl(var(--text))' }}>
+              Spaces We<br />
+              <em style={{ color: 'var(--grad-a)' }}>Build</em>
             </h2>
           </div>
-          <p className="text-sm text-[hsl(var(--muted))] max-w-xs leading-relaxed">
+          <p className="body-lg max-w-xs pb-1 opacity-0">
             Three approaches to inhabitation. One unwavering commitment to material truth.
           </p>
         </div>
       </div>
 
-      {/* Editorial blocks */}
-      <div className="max-w-[1400px] mx-auto">
-        <div className="flex flex-col gap-2">
-          {BLOCKS.map((block, i) => (
-            <EditorialBlock key={block.id} block={block} index={i} />
-          ))}
-        </div>
+      {/* Editorial blocks separated by hairline */}
+      <div
+        className="border-t"
+        style={{ borderColor: 'hsl(var(--stroke))' }}
+      >
+        {BLOCKS.map((block, i) => (
+          <div
+            key={block.id}
+            className="border-b"
+            style={{ borderColor: 'hsl(var(--stroke))' }}
+          >
+            <Block block={block} index={i} />
+          </div>
+        ))}
       </div>
     </section>
   );
