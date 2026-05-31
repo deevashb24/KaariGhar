@@ -4,6 +4,7 @@ generator client {
 
 datasource db {
   provider = "sqlite"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -12,7 +13,22 @@ model User {
   passwordHash    String
   name            String
   role            String      // 'CUSTOMER' or 'MAKER'
+  phone           String?
+  city            String?
+  bio             String?
   profileDetails  String?     // Can store JSON string of maker details
+  isProfileComplete Boolean   @default(false)
+  // --- Maker professional fields ---
+  shopName        String?
+  shopAddress     String?
+  licenseNumber   String?     // GST / Trade License
+  yearsExperience Int?
+  materials       String?     // Comma-separated: "Teak,Sheesham,Plywood"
+  workingHours    String?     // e.g. "Mon-Sat, 9 AM - 7 PM"
+  deliveryRadius  String?     // e.g. "50 km"
+  availability    String      @default("AVAILABLE") // AVAILABLE, BUSY, ON_VACATION
+  latitude        Float?
+  longitude       Float?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 
@@ -20,6 +36,12 @@ model User {
   quotes          Quote[]     @relation("MakerQuotes")
   sentMessages    Message[]   @relation("SentMessages")
   receivedMessages Message[]  @relation("ReceivedMessages")
+  reviewsGiven    Review[]    @relation("CustomerReviews")
+  reviewsReceived Review[]    @relation("MakerReviews")
+  favoritedBy     Favorite[]  @relation("FavoritedMaker")
+  favorites       Favorite[]  @relation("CustomerFavorites")
+  portfolio       PortfolioItem[]
+  notifications   Notification[]
 }
 
 model Request {
@@ -28,9 +50,12 @@ model Request {
   customer        User        @relation("CustomerRequests", fields: [customerId], references: [id])
   title           String
   description     String
+  specs           String?     // Structured JSON string of specifications
   budget          Float?
   status          String      @default("OPEN") // OPEN, QUOTED, IN_PROGRESS, COMPLETED
-  images          String?     // JSON array of image URLs
+  images          String?     // JSON array of image URLs (legacy)
+  attachments     String?     // JSON array of unlimited media links (YouTube, Insta, images, etc.)
+  aiInsights      String?     // AI-generated helpful insights for the Craftsman
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 
@@ -86,4 +111,49 @@ model Message {
   content         String
   timestamp       DateTime    @default(now())
   read            Boolean     @default(false)
+}
+
+model Review {
+  id              String      @id @default(uuid())
+  orderId         String      @unique
+  customerId      String
+  customer        User        @relation("CustomerReviews", fields: [customerId], references: [id])
+  makerId         String
+  maker           User        @relation("MakerReviews", fields: [makerId], references: [id])
+  rating          Int         // 1-5
+  comment         String?
+  createdAt       DateTime    @default(now())
+}
+
+model Favorite {
+  id              String      @id @default(uuid())
+  customerId      String
+  customer        User        @relation("CustomerFavorites", fields: [customerId], references: [id])
+  makerId         String
+  maker           User        @relation("FavoritedMaker", fields: [makerId], references: [id])
+  createdAt       DateTime    @default(now())
+
+  @@unique([customerId, makerId])
+}
+
+model PortfolioItem {
+  id              String      @id @default(uuid())
+  makerId         String
+  maker           User        @relation(fields: [makerId], references: [id])
+  imageUrl        String      // Base64 data URL or external URL
+  caption         String?
+  category        String?     // e.g. "Bedroom", "Living Room", "Office"
+  createdAt       DateTime    @default(now())
+}
+
+model Notification {
+  id              String      @id @default(uuid())
+  userId          String
+  user            User        @relation(fields: [userId], references: [id])
+  type            String      // QUOTE_RECEIVED, ORDER_UPDATE, MESSAGE, REVIEW
+  title           String
+  message         String
+  link            String?     // Optional deep link
+  read            Boolean     @default(false)
+  createdAt       DateTime    @default(now())
 }

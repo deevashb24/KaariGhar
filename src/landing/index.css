@@ -1,0 +1,154 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap');
+
+@theme {
+  --font-body: 'Inter', sans-serif;
+  --font-display: 'Instrument Serif', serif;
+
+  --color-bg: hsl(0 0% 4%);
+  --color-surface: hsl(0 0% 8%);
+  --color-text-primary: hsl(0 0% 96%);
+  --color-muted: hsl(0 0% 53%);
+  --color-stroke: hsl(0 0% 12%);
+  --color-accent: hsl(0 0% 96%);
+}
+
+/* ── Custom Properties ───────────────────────────── */
+:root {
+  --bg: 0 0% 4%;
+  --surface: 0 0% 8%;
+  --text: 0 0% 96%;
+  --muted: 0 0% 53%;
+  --stroke: 0 0% 12%;
+  --accent: 0 0% 96%;
+  --gradient-start: #8AAFD4;
+  --gradient-end: #4E85BF;
+}
+
+/* ── Base Reset ──────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background-color: hsl(var(--bg));
+  color: hsl(var(--text));
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* ── Accent Gradient ─────────────────────────────── */
+.accent-gradient {
+  background: linear-gradient(90deg, #8AAFD4 0%, #4E85BF 100%);
+}
+
+.accent-gradient-text {
+  background: linear-gradient(90deg, #8AAFD4 0%, #4E85BF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.accent-gradient-border {
+  background: linear-gradient(90deg, #8AAFD4 0%, #4E85BF 100%);
+  background-size: 200% 200%;
+  animation: gradient-shift 6s ease infinite;
+}
+
+/* ── Keyframe Animations ─────────────────────────── */
+@keyframes scroll-down {
+  0%   { transform: translateY(-100%); }
+  100% { transform: translateY(200%); }
+}
+
+@keyframes text-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes gradient-shift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.6; transform: scale(1.4); }
+}
+
+@keyframes float-up {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Utility Classes ─────────────────────────────── */
+.font-display { font-family: 'Instrument Serif', serif; }
+.font-body    { font-family: 'Inter', sans-serif; }
+
+.scroll-indicator {
+  animation: scroll-down 1.5s ease-in-out infinite;
+}
+
+.text-fade-in {
+  animation: text-fade-in 0.4s ease-out forwards;
+}
+
+.pulse-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+/* ── Glassmorphic ────────────────────────────────── */
+.glass {
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+/* ── Loading Screen ──────────────────────────────── */
+.loading-counter {
+  font-family: 'Instrument Serif', serif;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+/* ── Smooth Scrollbar Track ──────────────────────── */
+::-webkit-scrollbar          { width: 4px; }
+::-webkit-scrollbar-track    { background: hsl(var(--bg)); }
+::-webkit-scrollbar-thumb    { background: hsl(var(--stroke)); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted)); }
+
+/* ── Video Overlay ───────────────────────────────── */
+.video-grain::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Editorial blocks ────────────────────────────── */
+.editorial-image {
+  overflow: hidden;
+  position: relative;
+}
+
+.editorial-image img,
+.editorial-image .img-placeholder {
+  transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.editorial-image:hover img,
+.editorial-image:hover .img-placeholder {
+  transform: scale(1.05);
+}
+
+/* ── Selection ───────────────────────────────────── */
+::selection {
+  background: rgba(138, 175, 212, 0.3);
+  color: hsl(var(--text));
+}

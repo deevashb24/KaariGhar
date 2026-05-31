@@ -1,5 +1,5 @@
 import { useState, useContext } from 'react';
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from './AuthContext';
 import { t, LANGUAGES } from './i18n';
 import Hero from './components/Hero';
@@ -9,6 +9,9 @@ import Footer from './components/Footer';
 import AuthTabs from './components/Auth/AuthTabs';
 import CustomerDashboard from './components/Customer/CustomerDashboard';
 import MakerDashboard from './components/Maker/MakerDashboard';
+import ProfileSetup from './components/ProfileSetup';
+import NotificationBell from './components/NotificationBell';
+import LandingPage from './landing/LandingPage';
 import './App.css';
 
 // Protected Route Wrapper
@@ -20,7 +23,7 @@ const ProtectedRoute = ({ children, allowedRole }) => {
 };
 
 // Simplified Navbar for Portals
-const Navbar = ({ lang, setLang }) => {
+const AppNavbar = ({ lang, setLang }) => {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -36,8 +39,9 @@ const Navbar = ({ lang, setLang }) => {
       <div className="app-nav__actions">
         {user ? (
           <>
-            <span style={{ color: 'var(--text-light)', marginRight: '15px' }}>Hi, {user.name}</span>
-            <button className="gold-btn" onClick={() => { logout(); navigate('/'); }} style={{ padding: '8px 20px', fontSize: '0.85rem' }}>
+            <span style={{ color: 'var(--text-light)', marginRight: '8px' }}>Hi, {user.name}</span>
+            <NotificationBell />
+            <button className="gold-btn" onClick={() => { logout(); navigate('/'); }} style={{ padding: '8px 20px', fontSize: '0.85rem', marginLeft: '8px' }}>
               Logout
             </button>
           </>
@@ -53,19 +57,49 @@ const Navbar = ({ lang, setLang }) => {
 
 export default function App() {
   const [lang, setLang] = useState('en');
+  const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [showProfileSetup, setShowProfileSetup] = useState(false);
+
+  const isLandingPage = location.pathname === '/';
+
+  // Check if profile onboarding is needed
+  const needsOnboarding = user && user.isProfileComplete === false;
+
+  const handleStartOrder = () => {
+    if (user) {
+      navigate(user.role === 'CUSTOMER' ? '/customer' : '/maker');
+    } else {
+      navigate('/auth');
+    }
+  };
+
+  const handleViewMakers = () => {
+    if (user) {
+      navigate('/customer');
+    } else {
+      navigate('/auth');
+    }
+  };
+
+  // Landing page gets full screen treatment — no legacy chrome
+  if (isLandingPage) {
+    return <LandingPage />;
+  }
 
   return (
     <div className="app">
-      <Navbar lang={lang} setLang={setLang} />
+      <AppNavbar lang={lang} setLang={setLang} />
 
       <main className="app-main">
         <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={
+          {/* Original Marketplace Home */}
+          <Route path="/app" element={
             <>
-              <Hero lang={lang} onStartOrder={() => window.location.href = '/auth'} onViewMakers={() => window.location.href = '/auth'} />
+              <Hero lang={lang} onStartOrder={handleStartOrder} onViewMakers={handleViewMakers} />
               <HowItWorks lang={lang} />
-              <FeaturedMakers lang={lang} onViewMaker={() => window.location.href = '/auth'} />
+              <FeaturedMakers lang={lang} onViewMaker={handleViewMakers} />
               <Footer lang={lang} />
             </>
           } />
@@ -86,7 +120,11 @@ export default function App() {
           } />
         </Routes>
       </main>
+
+      {/* Profile Onboarding Overlay */}
+      {needsOnboarding && (
+        <ProfileSetup onComplete={() => setShowProfileSetup(false)} />
+      )}
     </div>
   );
 }
-

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'http://localhost:5000/api', // To be updated to Vercel/Prod URL later
+    baseURL: 'http://localhost:5001/api', // To be updated to Vercel/Prod URL later
 });
 
 api.interceptors.request.use((config) => {

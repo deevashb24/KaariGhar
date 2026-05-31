@@ -8,7 +8,6 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Check if user is logged in
         const storedUser = localStorage.getItem('user');
         const token = localStorage.getItem('token');
 
@@ -26,12 +25,18 @@ export const AuthProvider = ({ children }) => {
         return res.data.user;
     };
 
-    const register = async (email, password, name, role) => {
-        const res = await api.post('/auth/register', { email, password, name, role });
+    const register = async (email, password, name, role, phone, city) => {
+        const res = await api.post('/auth/register', { email, password, name, role, phone, city });
         localStorage.setItem('token', res.data.token);
         localStorage.setItem('user', JSON.stringify(res.data.user));
         setUser(res.data.user);
         return res.data.user;
+    };
+
+    const updateUser = (updatedFields) => {
+        const newUser = { ...user, ...updatedFields };
+        localStorage.setItem('user', JSON.stringify(newUser));
+        setUser(newUser);
     };
 
     const logout = () => {
@@ -43,7 +48,7 @@ export const AuthProvider = ({ children }) => {
     if (loading) return <div>Loading...</div>;
 
     return (
-        <AuthContext.Provider value={{ user, login, register, logout }}>
+        <AuthContext.Provider value={{ user, login, register, logout, updateUser }}>
             {children}
         </AuthContext.Provider>
     );

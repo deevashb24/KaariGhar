@@ -177,8 +177,9 @@ export default function LandingPage() {
             START YOUR JOURNEY
           </h2>
           <div className="flex flex-col items-center gap-stack-md">
-            <a className="px-12 py-5 rounded-full bg-primary-container text-on-primary-container font-label-caps text-label-caps hover:bg-primary-fixed-dim transition-colors shadow-[0_0_30px_rgba(212,175,55,0.2)]" href="#">Explore Now</a>
-            <a className="font-body-sm text-body-sm text-on-surface-variant underline underline-offset-4 hover:text-white transition-colors" href="#">Skip for now</a>
+            <Link className="px-12 py-5 rounded-full bg-primary-container text-on-primary-container font-label-caps text-label-caps hover:bg-primary-fixed-dim transition-colors shadow-[0_0_30px_rgba(212,175,55,0.2)]" href="/login">
+              Explore Now
+            </Link>
           </div>
         </section>
       </main>

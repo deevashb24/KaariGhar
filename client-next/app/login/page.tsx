@@ -1,13 +1,12 @@
-import React, { useState, useContext } from 'react';
-import { AuthContext } from '../../AuthContext';
-import { useNavigate } from 'react-router-dom';
+"use client";
+
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { toast, Toaster } from 'react-hot-toast';
 import { Mail, Lock, User, Briefcase, ChevronLeft, Phone, MapPin } from 'lucide-react';
 import './AuthTabs.css';
 
-import bgImage from '../../assets/auth-bg.png';
-
-export default function AuthTabs() {
+export default function LoginPage() {
     const [tab, setTab] = useState('login');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -17,10 +16,9 @@ export default function AuthTabs() {
     const [city, setCity] = useState('');
     const [isAnimating, setIsAnimating] = useState(false);
 
-    const { login, register } = useContext(AuthContext);
-    const navigate = useNavigate();
+    const router = useRouter();
 
-    const switchTab = (newTab) => {
+    const switchTab = (newTab: string) => {
         setIsAnimating(true);
         setTimeout(() => {
             setTab(newTab);
@@ -28,20 +26,18 @@ export default function AuthTabs() {
         }, 300);
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
             if (tab === 'login') {
-                const user = await login(email, password);
-                toast.success(`Welcome back, ${user.name}!`);
-                setTimeout(() => navigate(user.role === 'CUSTOMER' ? '/customer' : '/maker'), 1000);
+                toast.success(`Welcome back! MOCK LOGIN SUCCESS`);
+                setTimeout(() => router.push('/'), 1000); // Redirects to home since mock
             } else {
-                const user = await register(email, password, name, role, phone, city);
                 toast.success(`Account created successfully!`);
-                setTimeout(() => navigate(user.role === 'CUSTOMER' ? '/customer' : '/maker'), 1000);
+                setTimeout(() => router.push('/'), 1000);
             }
         } catch (err) {
-            toast.error(err.response?.data?.error || 'Authentication failed');
+            toast.error('Authentication failed');
         }
     };
 
@@ -55,9 +51,9 @@ export default function AuthTabs() {
             }} />
 
             {/* Left Panel */}
-            <div className="auth-left-panel" style={{ backgroundImage: `url(${bgImage})` }}>
+            <div className="auth-left-panel" style={{ backgroundImage: `url('/auth-bg.png')` }}>
                 <div className="auth-overlay">
-                    <button className="back-button" onClick={() => navigate('/')}>
+                    <button className="back-button" onClick={() => router.push('/')}>
                         <ChevronLeft size={20} /> Back to Home
                     </button>
                     <div className="auth-brand-content">

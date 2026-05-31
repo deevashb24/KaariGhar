@@ -13,7 +13,8 @@ const STEP_KEYS = ['rf_step_upload', 'rf_step_ai', 'rf_step_spec', 'rf_step_revi
 export default function RequestFlow({ lang, onClose, onSubmit }) {
     const [step, setStep] = useState(0);
     const [dragOver, setDragOver] = useState(false);
-    const [imagePreview, setImagePreview] = useState(null);
+    const [attachments, setAttachments] = useState([]);
+    const [links, setLinks] = useState('');
     const [description, setDescription] = useState('');
     const [submitted, setSubmitted] = useState(false);
     const [spec, setSpec] = useState({
@@ -43,17 +44,19 @@ export default function RequestFlow({ lang, onClose, onSubmit }) {
     const handleImageDrop = (e) => {
         e.preventDefault();
         setDragOver(false);
-        const file = e.dataTransfer?.files?.[0] || e.target?.files?.[0];
-        if (file) {
+        const files = Array.from(e.dataTransfer?.files || e.target?.files || []);
+        files.forEach(file => {
             const reader = new FileReader();
-            reader.onload = (ev) => setImagePreview(ev.target.result);
+            reader.onload = (ev) => setAttachments(prev => [...prev, ev.target.result]);
             reader.readAsDataURL(file);
-        }
+        });
     };
 
     const handleSubmit = () => {
         setSubmitted(true);
-        onSubmit?.({ spec, description });
+        const finalAttachments = [...attachments, ...links.split(/[\n,]+/).map(s => s.trim()).filter(Boolean)];
+        const aiMessage = `**AI Insights for Craftsman:**\n- **Project Focus:** High-quality ${spec.category} using ${spec.wood}.\n- **Customer Priority:** Durability and exact dimensions.\n- **Storage Requirement:** ${spec.storage}.\n- **References Provided:** ${finalAttachments.length > 0 ? finalAttachments.length + ' references attached.' : 'No references.'}\nMake sure to review the provided links or images if any!`;
+        onSubmit?.({ spec, description, attachments: finalAttachments, aiInsights: aiMessage });
     };
 
     if (submitted) {
@@ -97,37 +100,53 @@ export default function RequestFlow({ lang, onClose, onSubmit }) {
                 {step === 0 && (
                     <div className="rf__step anim-fade-up">
                         <h2 className="rf__title">{t('rf_title', lang)}</h2>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                            <div
+                                className={`rf__dropzone ${dragOver ? 'rf__dropzone--hover' : ''}`}
+                                onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                                onDragLeave={() => setDragOver(false)}
+                                onDrop={handleImageDrop}
+                                onClick={() => document.getElementById('rf-file-input').click()}
+                            >
+                                {attachments.length > 0 ? (
+                                    <div className="rf__preview-grid" style={{ display: 'flex', gap: '10px', overflowX: 'auto', padding: '10px' }}>
+                                        {attachments.map((src, idx) => (
+                                            <img key={idx} src={src} alt="Preview" style={{ height: '80px', borderRadius: '4px' }} />
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <>
+                                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                                            <circle cx="8.5" cy="8.5" r="1.5" />
+                                            <polyline points="21 15 16 10 5 21" />
+                                        </svg>
+                                        <h3>{t('rf_upload_title', lang)}</h3>
+                                        <p>Drag & drop multiple images or click to browse</p>
+                                    </>
+                                )}
+                                <input type="file" id="rf-file-input" accept="image/*" multiple onChange={handleImageDrop} hidden />
+                            </div>
 
-                        <div
-                            className={`rf__dropzone ${dragOver ? 'rf__dropzone--hover' : ''} ${imagePreview ? 'rf__dropzone--has-image' : ''}`}
-                            onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-                            onDragLeave={() => setDragOver(false)}
-                            onDrop={handleImageDrop}
-                            onClick={() => document.getElementById('rf-file-input').click()}
-                        >
-                            {imagePreview ? (
-                                <img src={imagePreview} alt="Preview" className="rf__preview-img" />
-                            ) : (
-                                <>
-                                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                                        <circle cx="8.5" cy="8.5" r="1.5" />
-                                        <polyline points="21 15 16 10 5 21" />
-                                    </svg>
-                                    <h3>{t('rf_upload_title', lang)}</h3>
-                                    <p>{t('rf_upload_desc', lang)}</p>
-                                </>
-                            )}
-                            <input type="file" id="rf-file-input" accept="image/*" onChange={handleImageDrop} hidden />
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-muted)', fontSize: '0.9rem' }}>Reference Links (YouTube, Instagram, Pinterest)</label>
+                                <textarea
+                                    className="rf__textarea"
+                                    placeholder="Paste inspiration links here..."
+                                    value={links}
+                                    onChange={(e) => setLinks(e.target.value)}
+                                    rows={2}
+                                />
+                            </div>
+
+                            <textarea
+                                className="rf__textarea"
+                                placeholder={t('rf_describe', lang)}
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                                rows={3}
+                            />
                         </div>
-
-                        <textarea
-                            className="rf__textarea"
-                            placeholder={t('rf_describe', lang)}
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                            rows={3}
-                        />
                     </div>
                 )}
 
