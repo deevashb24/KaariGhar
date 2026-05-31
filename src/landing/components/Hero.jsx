@@ -182,31 +182,31 @@ export default function Hero() {
         style={{ paddingTop: '80px' }}
       >
         {/* Eyebrow */}
-        <div className="hero-eyebrow flex items-center gap-4 mb-10 opacity-0">
-          <div className="w-8 h-px accent-gradient" />
-          <span className="eyebrow" style={{ color: 'rgba(255,255,255,0.55)' }}>
+        <div className="hero-eyebrow flex items-center gap-6 mb-12 opacity-0">
+          <div className="w-12 h-px accent-gradient" />
+          <span className="eyebrow" style={{ color: 'rgba(255,255,255,0.55)', letterSpacing: '0.4em' }}>
             Heritage &amp; Craft — Est. 2024
           </span>
-          <div className="w-8 h-px accent-gradient" />
+          <div className="w-12 h-px accent-gradient" />
         </div>
 
         {/* Brand name */}
-        <h1 className="hero-name display-hero opacity-0 mb-6"
-          style={{ color: 'hsl(var(--text))' }}
+        <h1 className="hero-name display-hero opacity-0"
+          style={{ color: 'hsl(var(--text))', marginBottom: '3.5rem' }}
         >
           KaariGhar
         </h1>
 
         {/* Dynamic role */}
-        <div className="hero-role-line flex items-center justify-center gap-2 mb-8 opacity-0">
-          <span className="text-base md:text-lg font-light"
-            style={{ color: 'hsl(var(--muted))' }}
+        <div className="hero-role-line flex items-center justify-center gap-3 opacity-0" style={{ marginBottom: '3rem' }}>
+          <span className="text-lg md:text-xl font-light"
+            style={{ color: 'hsl(var(--muted))', letterSpacing: '0.05em' }}
           >
             We are
           </span>
           <span
             className="relative overflow-hidden"
-            style={{ minWidth: '8rem', display: 'inline-flex', justifyContent: 'center' }}
+            style={{ minWidth: '9rem', display: 'inline-flex', justifyContent: 'center' }}
           >
             <AnimatePresence mode="wait">
               <motion.span
@@ -222,15 +222,15 @@ export default function Hero() {
               </motion.span>
             </AnimatePresence>
           </span>
-          <span className="text-base md:text-lg font-light"
-            style={{ color: 'hsl(var(--muted))' }}
+          <span className="text-lg md:text-xl font-light"
+            style={{ color: 'hsl(var(--muted))', letterSpacing: '0.05em' }}
           >
             of space.
           </span>
         </div>
 
         {/* Description */}
-        <p className="hero-desc body-lg max-w-md mb-12 opacity-0">
+        <p className="hero-desc body-lg max-w-lg opacity-0" style={{ marginBottom: '4rem', lineHeight: 1.8 }}>
           Every room we conceive is a dialogue between material and memory.
           We build spaces that do not merely shelter — they resonate.
         </p>

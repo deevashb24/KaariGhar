@@ -72,7 +72,7 @@ export default function StatsSection() {
     >
       <div className="container">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-8 mb-20">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', marginBottom: '5rem' }}>
           <div>
             <p className="eyebrow mb-5">The Numbers</p>
             <h2 className="display-xl" style={{ color: 'hsl(var(--text))' }}>
@@ -87,25 +87,36 @@ export default function StatsSection() {
         </div>
 
         {/* Stats grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-px"
-          style={{ background: 'hsl(var(--stroke))' }}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))',
+            gap: '1px',
+            background: 'hsl(var(--stroke))',
+          }}
         >
           {STATS.map((s, i) => (
             <div
               key={i}
-              className="stat-card flex flex-col justify-between p-8 md:p-12 opacity-0"
-              style={{ background: 'hsl(var(--bg))' }}
+              className="stat-card"
+              style={{
+                opacity: 0,
+                background: 'hsl(var(--bg))',
+                padding: 'clamp(2.5rem, 4vw, 3.5rem)',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                minHeight: '240px',
+              }}
             >
-              <div className="mb-8">
+              <div style={{ marginBottom: '3rem' }}>
                 <Counter target={s.value} suffix={s.suffix} />
               </div>
-              <div>
-                <p className="text-sm font-medium mb-1"
-                  style={{ color: 'hsl(var(--text))' }}
-                >
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <p style={{ fontSize: '0.8125rem', fontWeight: 500, color: 'hsl(var(--text))' }}>
                   {s.label}
                 </p>
-                <p className="text-xs" style={{ color: 'hsl(var(--faint))' }}>
+                <p style={{ fontSize: '0.7rem', color: 'hsl(var(--faint))', letterSpacing: '0.05em' }}>
                   {s.sub}
                 </p>
               </div>

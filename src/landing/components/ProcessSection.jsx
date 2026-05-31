@@ -66,7 +66,7 @@ export default function ProcessSection() {
       <div className="container">
 
         {/* Header */}
-        <div className="proc-header flex flex-col md:flex-row md:items-end md:justify-between gap-10 mb-20">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', marginBottom: '5rem' }}>
           <div>
             <p className="eyebrow mb-5 opacity-0">How We Work</p>
             <h2 className="display-xl opacity-0" style={{ color: 'hsl(var(--text))' }}>
@@ -74,34 +74,53 @@ export default function ProcessSection() {
               <em style={{ color: 'var(--grad-a)' }}>Behind</em> the Space
             </h2>
           </div>
-          <p className="body-lg max-w-xs pb-1 opacity-0">
+          <p className="body-lg opacity-0" style={{ maxWidth: '44ch' }}>
             Four deliberate phases. No shortcuts. No compromises.
           </p>
         </div>
 
         {/* Cards */}
-        <div className="proc-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px"
-          style={{ background: 'hsl(var(--stroke))' }}
+        <div
+          className="proc-grid"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))',
+            gap: '1px',
+            background: 'hsl(var(--stroke))',
+          }}
         >
           {STEPS.map((s, i) => (
             <div
               key={s.no}
-              className="proc-card group flex flex-col p-10 opacity-0
-                transition-colors duration-300 cursor-default"
-              style={{ background: 'hsl(var(--bg))' }}
+              className="proc-card group"
+              style={{
+                opacity: 0,
+                background: 'hsl(var(--bg))',
+                padding: 'clamp(3rem, 5vw, 4rem)',
+                display: 'flex',
+                flexDirection: 'column',
+                cursor: 'default',
+                transition: 'background 0.3s',
+                minHeight: '400px',
+              }}
               onMouseEnter={(e) => { e.currentTarget.style.background = 'hsl(var(--surface))'; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = 'hsl(var(--bg))'; }}
               data-cursor-hover
             >
               {/* Phase tag */}
-              <div className="flex items-center gap-3 mb-12">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '3.5rem' }}>
                 <span
-                  className="text-[10px] font-semibold uppercase tracking-[0.3em]"
-                  style={{ color: 'hsl(var(--faint))' }}
+                  style={{
+                    fontSize: '0.625rem',
+                    fontWeight: 600,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.3em',
+                    color: 'hsl(var(--faint))',
+                  }}
                 >
                   {s.no}
                 </span>
-                <div className="flex-1 h-px" style={{ background: 'hsl(var(--stroke))' }} />
+                <div style={{ flex: 1, height: '1px', background: 'hsl(var(--stroke))' }} />
                 <span className="eyebrow" style={{ color: 'hsl(var(--faint))' }}>
                   {s.phase}
                 </span>
@@ -109,8 +128,8 @@ export default function ProcessSection() {
 
               {/* Heading */}
               <h3
-                className="display-lg mb-6 whitespace-pre-line"
-                style={{ color: 'hsl(var(--text))' }}
+                className="display-lg"
+                style={{ color: 'hsl(var(--text))', whiteSpace: 'pre-line', marginBottom: '2.5rem' }}
               >
                 {s.heading}
               </h3>

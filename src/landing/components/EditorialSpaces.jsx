@@ -41,37 +41,29 @@ const BLOCKS = [
 ];
 
 function Block({ block, index }) {
-  const ref   = useRef(null);
+  const ref    = useRef(null);
   const imgRef = useRef(null);
   const txtRef = useRef(null);
   const isLeft = block.layout === 'img-left';
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Image slides in from its side
       gsap.fromTo(imgRef.current,
-        { opacity: 0, x: isLeft ? -60 : 60, scale: 0.97 },
+        { opacity: 0, x: isLeft ? -50 : 50, scale: 0.97 },
         {
           opacity: 1, x: 0, scale: 1,
-          duration: 1.3, ease: 'power3.out',
-          scrollTrigger: {
-            trigger: ref.current,
-            start: 'top 72%',
-          },
+          duration: 1.4, ease: 'power3.out',
+          scrollTrigger: { trigger: ref.current, start: 'top 75%' },
         }
       );
-
-      // Text stagger
-      gsap.fromTo(txtRef.current.querySelectorAll('.txt-reveal'),
-        { opacity: 0, y: 36 },
+      gsap.fromTo(
+        txtRef.current.querySelectorAll('.txt-reveal'),
+        { opacity: 0, y: 40 },
         {
           opacity: 1, y: 0,
-          duration: 0.9, ease: 'power3.out',
-          stagger: 0.1,
-          scrollTrigger: {
-            trigger: ref.current,
-            start: 'top 68%',
-          },
+          duration: 1, ease: 'power3.out',
+          stagger: 0.12,
+          scrollTrigger: { trigger: ref.current, start: 'top 70%' },
         }
       );
     }, ref);
@@ -79,12 +71,15 @@ function Block({ block, index }) {
   }, [isLeft]);
 
   return (
-    <article ref={ref} className="grid grid-cols-1 lg:grid-cols-2 min-h-[85vh]">
+    <article ref={ref} className="grid grid-cols-1 lg:grid-cols-2" style={{ minHeight: '90vh' }}>
       {/* ── Image pane ── */}
       <div
         ref={imgRef}
-        className={`img-zoom relative overflow-hidden ${isLeft ? 'lg:order-first' : 'lg:order-last'}`}
-        style={{ minHeight: '55vw', maxHeight: '80vh', height: 'auto' }}
+        className="img-zoom relative overflow-hidden"
+        style={{
+          order: isLeft ? 1 : 2,
+          minHeight: '50vh',
+        }}
         data-cursor-hover
       >
         <img
@@ -93,22 +88,23 @@ function Block({ block, index }) {
           className="absolute inset-0 w-full h-full object-cover"
           loading="lazy"
         />
-        {/* Inner gradient at bottom of image */}
-        <div className="absolute inset-x-0 bottom-0 h-32 pointer-events-none"
-          style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.45), transparent)' }}
+        {/* Bottom gradient */}
+        <div
+          className="absolute inset-x-0 bottom-0 pointer-events-none"
+          style={{
+            height: '40%',
+            background: 'linear-gradient(to top, rgba(0,0,0,0.55), transparent)',
+          }}
         />
-        {/* Image caption */}
-        <div className="absolute bottom-6 left-6">
-          <span className="eyebrow" style={{ color: 'rgba(255,255,255,0.5)' }}>
+        {/* Caption */}
+        <div className="absolute bottom-8 left-8">
+          <span className="eyebrow" style={{ color: 'rgba(255,255,255,0.55)' }}>
             {block.imageLabel}
           </span>
         </div>
-        {/* Index */}
-        <div className="absolute top-6 right-6">
-          <span
-            className="text-[10px] font-medium tabular-nums"
-            style={{ color: 'rgba(255,255,255,0.3)', letterSpacing: '0.2em' }}
-          >
+        {/* Index tag */}
+        <div className="absolute top-8 right-8">
+          <span style={{ fontSize: '0.625rem', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.2em', fontFamily: 'Inter, sans-serif', fontWeight: 500 }}>
             {String(index + 1).padStart(2, '0')} / 03
           </span>
         </div>
@@ -117,44 +113,88 @@ function Block({ block, index }) {
       {/* ── Text pane ── */}
       <div
         ref={txtRef}
-        className={`flex flex-col justify-center px-10 py-20 lg:px-20 xl:px-28 ${
-          isLeft ? 'lg:order-last' : 'lg:order-first'
-        }`}
-        style={{ background: 'hsl(var(--bg))' }}
+        style={{
+          order: isLeft ? 2 : 1,
+          background: 'hsl(var(--bg))',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          /* Generous padding: 64px top/bottom, 80px sides on lg, 128px on xl */
+          padding: 'clamp(3rem, 6vw, 5rem) clamp(2.5rem, 5vw, 4rem)',
+        }}
       >
-        {/* Eyebrow */}
-        <div className="txt-reveal flex items-center gap-4 mb-10 opacity-0">
-          <div className="w-10 h-px accent-gradient shrink-0" />
+        {/* Eyebrow row */}
+        <div
+          className="txt-reveal"
+          style={{
+            opacity: 0,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem',
+            marginBottom: '2.5rem',
+          }}
+        >
+          <div style={{ width: '2.5rem', height: '1px', background: 'linear-gradient(135deg, var(--grad-a), var(--grad-b))', flexShrink: 0 }} />
           <span className="eyebrow">{block.eyebrow}</span>
         </div>
 
         {/* Heading */}
         <h2
-          className="txt-reveal display-xl mb-10 opacity-0 whitespace-pre-line"
-          style={{ color: 'hsl(var(--text))' }}
+          className="txt-reveal display-xl"
+          style={{
+            opacity: 0,
+            color: 'hsl(var(--text))',
+            whiteSpace: 'pre-line',
+            marginBottom: '2rem',
+          }}
         >
           {block.heading}
         </h2>
 
         {/* Body copy */}
-        <p className="txt-reveal body-lg mb-12 max-w-sm opacity-0">
+        <p
+          className="txt-reveal body-lg"
+          style={{
+            opacity: 0,
+            maxWidth: '38ch',
+            marginBottom: '3rem',
+          }}
+        >
           {block.body}
         </p>
 
-        {/* Text link */}
+        {/* CTA link */}
         <a
           href={block.href}
-          className="txt-reveal group inline-flex items-center gap-4 opacity-0 w-fit"
-          style={{ color: 'hsl(var(--text))' }}
+          className="txt-reveal group"
+          style={{
+            opacity: 0,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '1rem',
+            color: 'hsl(var(--text))',
+            width: 'fit-content',
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--grad-a)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = 'hsl(var(--text))'; }}
         >
-          <span
-            className="text-xs font-semibold uppercase tracking-[0.22em] transition-colors duration-300 group-hover:text-[var(--grad-a)]"
-          >
+          <span style={{ fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.22em', transition: 'color 0.3s' }}>
             {block.link}
           </span>
           <span
-            className="h-px transition-all duration-400 group-hover:w-14"
-            style={{ width: '2.5rem', background: 'currentColor' }}
+            style={{
+              height: '1px',
+              width: '2.5rem',
+              background: 'currentColor',
+              display: 'inline-block',
+              transition: 'width 0.4s ease',
+            }}
+            ref={(el) => {
+              if (!el) return;
+              const a = el.parentElement;
+              a.addEventListener('mouseenter', () => { el.style.width = '4rem'; });
+              a.addEventListener('mouseleave', () => { el.style.width = '2.5rem'; });
+            }}
           />
         </a>
       </div>
@@ -168,14 +208,11 @@ export default function EditorialSpaces() {
   useEffect(() => {
     const ctx = gsap.context(() => {
       gsap.fromTo('.editorial-header > *',
-        { opacity: 0, y: 32 },
+        { opacity: 0, y: 36 },
         {
           opacity: 1, y: 0,
-          duration: 1, stagger: 0.12, ease: 'power3.out',
-          scrollTrigger: {
-            trigger: '.editorial-header',
-            start: 'top 80%',
-          },
+          duration: 1, stagger: 0.14, ease: 'power3.out',
+          scrollTrigger: { trigger: '.editorial-header', start: 'top 80%' },
         }
       );
     }, ref);
@@ -183,33 +220,42 @@ export default function EditorialSpaces() {
   }, []);
 
   return (
-    <section id="spaces" ref={ref} style={{ background: 'hsl(var(--bg))' }}>
-      {/* Section header */}
-      <div className="container section-pad">
-        <div className="editorial-header flex flex-col md:flex-row md:items-end md:justify-between gap-8">
-          <div>
-            <p className="eyebrow mb-5 opacity-0">Our Collections</p>
-            <h2 className="display-xl opacity-0" style={{ color: 'hsl(var(--text))' }}>
-              Spaces We<br />
-              <em style={{ color: 'var(--grad-a)' }}>Build</em>
+    <section
+      id="spaces"
+      ref={ref}
+      style={{ background: 'hsl(var(--bg))' }}
+    >
+      {/* ── Section header ── */}
+      <div className="container" style={{ paddingTop: 'var(--section-y)', paddingBottom: 'var(--section-y)' }}>
+        <div
+          className="editorial-header"
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '3rem',
+          }}
+        >
+          {/* Top row */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <p className="eyebrow" style={{ opacity: 0 }}>Our Collections</p>
+            <h2 className="display-xl" style={{ opacity: 0, color: 'hsl(var(--text))' }}>
+              Spaces We <em style={{ color: 'var(--grad-a)' }}>Build</em>
             </h2>
           </div>
-          <p className="body-lg max-w-xs pb-1 opacity-0">
-            Three approaches to inhabitation. One unwavering commitment to material truth.
+          {/* Description */}
+          <p className="body-lg" style={{ opacity: 0, maxWidth: '46ch' }}>
+            Three approaches to inhabitation. One unwavering commitment to material truth
+            — each space a conversation between the made and the found.
           </p>
         </div>
       </div>
 
-      {/* Editorial blocks separated by hairline */}
-      <div
-        className="border-t"
-        style={{ borderColor: 'hsl(var(--stroke))' }}
-      >
+      {/* ── Editorial blocks ── */}
+      <div style={{ borderTop: '1px solid hsl(var(--stroke))' }}>
         {BLOCKS.map((block, i) => (
           <div
             key={block.id}
-            className="border-b"
-            style={{ borderColor: 'hsl(var(--stroke))' }}
+            style={{ borderBottom: '1px solid hsl(var(--stroke))' }}
           >
             <Block block={block} index={i} />
           </div>

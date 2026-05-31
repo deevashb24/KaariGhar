@@ -86,20 +86,20 @@ export default function ContactFooter() {
       <div className="relative z-10 container section-pad">
 
         {/* CTA block */}
-        <div className="text-center mb-28">
-          <p className="footer-reveal eyebrow mb-8 opacity-0">
+        <div className="text-center" style={{ marginBottom: '10rem' }}>
+          <p className="footer-reveal eyebrow opacity-0" style={{ marginBottom: '3rem' }}>
             Begin Something Enduring
           </p>
 
           <h2
-            className="footer-reveal display-hero mb-10 opacity-0"
-            style={{ color: 'hsl(var(--text))' }}
+            className="footer-reveal display-hero opacity-0"
+            style={{ color: 'hsl(var(--text))', marginBottom: '3rem' }}
           >
             Begin your<br />
             <em style={{ color: 'var(--grad-a)' }}>journey.</em>
           </h2>
 
-          <p className="footer-reveal body-lg max-w-sm mx-auto mb-14 opacity-0">
+          <p className="footer-reveal body-lg max-w-sm mx-auto opacity-0" style={{ marginBottom: '4.5rem' }}>
             Every extraordinary space begins with a single conversation.
             Tell us about your vision and we will answer with possibility.
           </p>
@@ -129,7 +129,7 @@ export default function ContactFooter() {
         </div>
 
         {/* Divider */}
-        <div className="hr-subtle mb-10" />
+        <div className="hr-subtle" style={{ marginBottom: '3.5rem' }} />
 
         {/* Footer bar */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-8">

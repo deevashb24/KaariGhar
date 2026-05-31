@@ -27,46 +27,49 @@ const PILLARS = [
   },
 ];
 
+const QUOTE_WORDS = 'A space should outlive its architect, outlast its owners, and reveal new dimensions to every generation that inhabits it.'.split(' ');
+
 export default function Manifesto() {
   const sectionRef = useRef(null);
   const quoteRef   = useRef(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Header
-      gsap.fromTo('.manifesto-header > *',
-        { opacity: 0, y: 32 },
+
+      // Header stagger
+      gsap.fromTo('.manifesto-hdr > *',
+        { opacity: 0, y: 36 },
         {
           opacity: 1, y: 0,
-          stagger: 0.12, duration: 0.9, ease: 'power3.out',
-          scrollTrigger: { trigger: '.manifesto-header', start: 'top 78%' },
+          stagger: 0.13, duration: 1, ease: 'power3.out',
+          scrollTrigger: { trigger: '.manifesto-hdr', start: 'top 78%' },
         }
       );
 
-      // Pillars
-      gsap.fromTo('.pillar',
-        { opacity: 0, y: 48 },
+      // Pillar cards stagger
+      gsap.fromTo('.pillar-card',
+        { opacity: 0, y: 50 },
         {
           opacity: 1, y: 0,
-          stagger: 0.1, duration: 0.85, ease: 'power3.out',
+          stagger: 0.1, duration: 0.9, ease: 'power3.out',
           scrollTrigger: { trigger: '.pillars-grid', start: 'top 75%' },
         }
       );
 
-      // Quote word-by-word reveal (split by spaces)
-      const words = quoteRef.current?.querySelectorAll('.word');
+      // Quote: scrub word opacity
+      const words = quoteRef.current?.querySelectorAll('.q-word');
       if (words?.length) {
         gsap.fromTo(words,
-          { opacity: 0.15 },
+          { opacity: 0.12 },
           {
             opacity: 1,
-            stagger: 0.04,
+            stagger: 0.05,
             ease: 'none',
             scrollTrigger: {
               trigger: quoteRef.current,
-              start: 'top 75%',
-              end:   'bottom 50%',
-              scrub: 0.8,
+              start: 'top 78%',
+              end:   'bottom 45%',
+              scrub: 0.9,
             },
           }
         );
@@ -75,116 +78,159 @@ export default function Manifesto() {
     return () => ctx.revert();
   }, []);
 
-  // Split quote into word spans for scrubbed reveal
-  const QUOTE = "A space should outlive its architect, outlast its owners, and reveal new dimensions to every generation that inhabits it.";
-  const words = QUOTE.split(' ');
-
   return (
     <section
       id="manifesto"
       ref={sectionRef}
-      className="section-pad overflow-hidden"
-      style={{ background: 'hsl(var(--bg))' }}
+      style={{
+        background: 'hsl(var(--bg))',
+        paddingTop: 'var(--section-y)',
+        paddingBottom: 'var(--section-y)',
+        overflow: 'hidden',
+      }}
     >
       <div className="container">
 
         {/* ── Section header ── */}
-        <div className="manifesto-header flex flex-col md:flex-row md:items-end md:justify-between gap-10 mb-24">
-          <div>
-            <p className="eyebrow mb-5 opacity-0">Our Philosophy</p>
-            <h2 className="display-xl opacity-0" style={{ color: 'hsl(var(--text))' }}>
-              The Four<br />
-              <em style={{ color: 'var(--grad-a)' }}>Tenets</em>
+        <div
+          className="manifesto-hdr"
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '2rem',
+            marginBottom: '5rem',
+          }}
+        >
+          <p className="eyebrow" style={{ opacity: 0 }}>Our Philosophy</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
+            <h2 className="display-xl" style={{ opacity: 0, color: 'hsl(var(--text))' }}>
+              The Four <em style={{ color: 'var(--grad-a)' }}>Tenets</em>
             </h2>
+            <p className="body-lg" style={{ opacity: 0, maxWidth: '44ch' }}>
+              Not rules — convictions. Each one forged over a decade of honest
+              engagement with space, material, and the people who inhabit both.
+            </p>
           </div>
-          <p className="body-lg max-w-xs pb-1 opacity-0">
-            Not rules but convictions. Each one forged over a decade of
-            honest engagement with space and material.
-          </p>
         </div>
 
         {/* ── Pillars grid ── */}
         <div
-          className="pillars-grid grid grid-cols-1 md:grid-cols-2 gap-px mb-32"
-          style={{ background: 'hsl(var(--stroke))' }}
+          className="pillars-grid"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 420px), 1fr))',
+            gap: '1px',
+            background: 'hsl(var(--stroke))',
+            marginBottom: '8rem',
+          }}
         >
           {PILLARS.map((p) => (
             <div
               key={p.no}
-              className="pillar group flex gap-8 p-10 xl:p-14 opacity-0
-                transition-colors duration-300 cursor-default"
-              style={{ background: 'hsl(var(--bg))' }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'hsl(var(--surface))';
+              className="pillar-card"
+              style={{
+                opacity: 0,
+                background: 'hsl(var(--bg))',
+                padding: 'clamp(2rem, 4vw, 3.5rem)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 0,
+                cursor: 'default',
+                transition: 'background 0.3s',
               }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'hsl(var(--bg))';
-              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'hsl(var(--surface))'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'hsl(var(--bg))'; }}
               data-cursor-hover
             >
               {/* Number */}
               <span
-                className="shrink-0 mt-0.5 transition-colors duration-300"
                 style={{
                   fontFamily: 'Instrument Serif, serif',
-                  fontSize: 'clamp(2rem, 3vw, 2.5rem)',
+                  fontSize: 'clamp(2.5rem, 4vw, 3.5rem)',
                   fontStyle: 'italic',
                   lineHeight: 1,
                   color: 'hsl(var(--stroke))',
+                  display: 'block',
+                  marginBottom: '2.5rem',
+                  transition: 'color 0.3s',
                 }}
-                data-no={p.no}
               >
                 {p.no}
               </span>
 
-              <div>
-                <h3
-                  className="text-sm font-semibold uppercase tracking-[0.18em] mb-4
-                    transition-colors duration-300"
-                  style={{ color: 'hsl(var(--text))' }}
-                >
-                  {p.title}
-                </h3>
-                <p className="body-lg" style={{ maxWidth: '30ch' }}>
-                  {p.desc}
-                </p>
-              </div>
+              {/* Title */}
+              <h3
+                style={{
+                  fontFamily: 'Inter, sans-serif',
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.18em',
+                  color: 'hsl(var(--text))',
+                  marginBottom: '1.25rem',
+                }}
+              >
+                {p.title}
+              </h3>
+
+              {/* Description */}
+              <p className="body-lg" style={{ maxWidth: '32ch' }}>
+                {p.desc}
+              </p>
             </div>
           ))}
         </div>
 
-        {/* ── Scroll-reveal quote ── */}
+        {/* ── Scroll-reveal quote block ── */}
         <div
           ref={quoteRef}
-          className="max-w-4xl mx-auto text-center py-8"
+          style={{
+            maxWidth: '52rem',
+            margin: '0 auto',
+            textAlign: 'center',
+            padding: '2rem 0',
+          }}
         >
-          <div
-            className="mb-8 mx-auto"
-            style={{
-              width: '1px', height: '60px',
-              background: 'linear-gradient(to bottom, hsl(var(--stroke)), transparent)',
-            }}
-          />
+          {/* Top fade line */}
+          <div style={{ width: '1px', height: '80px', background: 'linear-gradient(to bottom, hsl(var(--stroke)), transparent)', margin: '0 auto 3rem' }} />
+
           <blockquote
-            className="display-lg mb-8 leading-relaxed"
-            style={{ color: 'hsl(var(--text))', maxWidth: '34ch', margin: '0 auto 2rem' }}
+            className="display-lg"
+            style={{
+              color: 'hsl(var(--text))',
+              lineHeight: 1.5,
+              marginBottom: '2.5rem',
+            }}
           >
-            {words.map((w, i) => (
-              <span key={i} className="word inline-block mr-[0.35em]">
+            {QUOTE_WORDS.map((w, i) => (
+              <span
+                key={i}
+                className="q-word"
+                style={{
+                  display: 'inline-block',
+                  marginRight: '0.32em',      /* ← inline style: no Tailwind arbitrary needed */
+                  marginBottom: '0.12em',
+                }}
+              >
                 {w}
               </span>
             ))}
           </blockquote>
-          <cite className="eyebrow not-italic" style={{ color: 'hsl(var(--faint))' }}>
+
+          <cite
+            className="eyebrow"
+            style={{
+              color: 'hsl(var(--faint))',
+              fontStyle: 'normal',
+              display: 'block',
+              marginBottom: '3rem',
+            }}
+          >
             — KaariGhar Design Manifesto, 2024
           </cite>
-          <div
-            className="mt-8 mx-auto"
-            style={{
-              width: '1px', height: '60px',
-              background: 'linear-gradient(to top, hsl(var(--stroke)), transparent)',
-            }}
-          />
+
+          {/* Bottom fade line */}
+          <div style={{ width: '1px', height: '80px', background: 'linear-gradient(to top, hsl(var(--stroke)), transparent)', margin: '0 auto' }} />
         </div>
 
       </div>
