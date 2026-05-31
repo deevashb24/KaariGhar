@@ -57,22 +57,8 @@ export default function Hero() {
     // Overlay darkens as user scrolls into content
     parallaxTl.to(overlay, { opacity: 0.85, ease: 'none' }, 0);
 
-    // Scroll-drive video currentTime (when loaded)
-    const syncVideoTime = () => {
-      const st = ScrollTrigger.create({
-        trigger: section,
-        start: 'top top',
-        end: 'bottom top',
-        onUpdate: (self) => {
-          if (video.duration) {
-            video.currentTime = self.progress * (video.duration * 0.6);
-          }
-        },
-      });
-      return st;
-    };
-
-    const videoST = syncVideoTime();
+    // Removed video sync scrubbing to drastically improve performance
+    // HLS video scrubbing on scroll causes massive main-thread blocking.
 
     // Headline scale down and fade out on scroll
     gsap.fromTo(headlineRef.current,
@@ -93,7 +79,6 @@ export default function Hero() {
 
     return () => {
       parallaxTl.scrollTrigger?.kill();
-      videoST?.kill();
       ScrollTrigger.getAll().forEach(t => t.kill());
     };
   }, []);
