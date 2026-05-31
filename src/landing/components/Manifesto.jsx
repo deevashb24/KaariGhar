@@ -37,7 +37,7 @@ export default function Manifesto() {
     const ctx = gsap.context(() => {
 
       // Header stagger
-      gsap.fromTo('.manifesto-hdr > *',
+      gsap.fromTo('.manifesto-hdr .reveal-target',
         { opacity: 0, y: 36 },
         {
           opacity: 1, y: 0,
@@ -101,12 +101,12 @@ export default function Manifesto() {
             marginBottom: '5rem',
           }}
         >
-          <p className="eyebrow" style={{ opacity: 0 }}>Our Philosophy</p>
+          <p className="eyebrow reveal-target" style={{ opacity: 0 }}>Our Philosophy</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
-            <h2 className="display-xl" style={{ opacity: 0, color: 'hsl(var(--text))' }}>
+            <h2 className="display-xl reveal-target" style={{ opacity: 0, color: 'hsl(var(--text))' }}>
               The Four <em style={{ color: 'var(--grad-a)' }}>Tenets</em>
             </h2>
-            <p className="body-lg" style={{ opacity: 0, maxWidth: '44ch' }}>
+            <p className="body-lg reveal-target" style={{ opacity: 0, maxWidth: '44ch' }}>
               Not rules — convictions. Each one forged over a decade of honest
               engagement with space, material, and the people who inhabit both.
             </p>
@@ -228,9 +228,6 @@ export default function Manifesto() {
           >
             — KaariGhar Design Manifesto, 2024
           </cite>
-
-          {/* Bottom fade line */}
-          <div style={{ width: '1px', height: '80px', background: 'linear-gradient(to top, hsl(var(--stroke)), transparent)', margin: '0 auto' }} />
         </div>
 
       </div>

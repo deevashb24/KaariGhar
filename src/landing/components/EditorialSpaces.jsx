@@ -207,7 +207,7 @@ export default function EditorialSpaces() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.fromTo('.editorial-header > *',
+      gsap.fromTo('.editorial-header .reveal-target',
         { opacity: 0, y: 36 },
         {
           opacity: 1, y: 0,
@@ -237,13 +237,13 @@ export default function EditorialSpaces() {
         >
           {/* Top row */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <p className="eyebrow" style={{ opacity: 0 }}>Our Collections</p>
-            <h2 className="display-xl" style={{ opacity: 0, color: 'hsl(var(--text))' }}>
+            <p className="eyebrow reveal-target" style={{ opacity: 0 }}>Our Collections</p>
+            <h2 className="display-xl reveal-target" style={{ opacity: 0, color: 'hsl(var(--text))' }}>
               Spaces We <em style={{ color: 'var(--grad-a)' }}>Build</em>
             </h2>
           </div>
           {/* Description */}
-          <p className="body-lg" style={{ opacity: 0, maxWidth: '46ch' }}>
+          <p className="body-lg reveal-target" style={{ opacity: 0, maxWidth: '46ch' }}>
             Three approaches to inhabitation. One unwavering commitment to material truth
             — each space a conversation between the made and the found.
           </p>

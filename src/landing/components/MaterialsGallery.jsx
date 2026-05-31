@@ -36,7 +36,7 @@ export default function MaterialsGallery() {
 
       // Left column scrolls up faster (pull-up)
       gsap.to(colLeftRef.current, {
-        yPercent: -22,
+        yPercent: -15,
         ease: 'none',
         scrollTrigger: {
           trigger: sectionRef.current,
@@ -70,7 +70,7 @@ export default function MaterialsGallery() {
       ref={sectionRef}
       className="relative overflow-hidden"
       style={{
-        minHeight: '240vh',
+        minHeight: '160vh',
         background: 'hsl(var(--bg))',
       }}
     >

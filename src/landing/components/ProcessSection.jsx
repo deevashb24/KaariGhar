@@ -44,7 +44,7 @@ export default function ProcessSection() {
           scrollTrigger: { trigger: '.proc-grid', start: 'top 75%' },
         }
       );
-      gsap.fromTo('.proc-header > *',
+      gsap.fromTo('.proc-header .reveal-target',
         { opacity: 0, y: 28 },
         {
           opacity: 1, y: 0,
@@ -66,15 +66,15 @@ export default function ProcessSection() {
       <div className="container">
 
         {/* Header */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', marginBottom: '5rem' }}>
+        <div className="proc-header" style={{ display: 'flex', flexDirection: 'column', gap: '2rem', marginBottom: '5rem' }}>
           <div>
-            <p className="eyebrow mb-5 opacity-0">How We Work</p>
-            <h2 className="display-xl opacity-0" style={{ color: 'hsl(var(--text))' }}>
+            <p className="eyebrow mb-5 reveal-target" style={{ opacity: 0 }}>How We Work</p>
+            <h2 className="display-xl reveal-target" style={{ opacity: 0, color: 'hsl(var(--text))' }}>
               The Process<br />
               <em style={{ color: 'var(--grad-a)' }}>Behind</em> the Space
             </h2>
           </div>
-          <p className="body-lg opacity-0" style={{ maxWidth: '44ch' }}>
+          <p className="body-lg reveal-target" style={{ opacity: 0, maxWidth: '44ch' }}>
             Four deliberate phases. No shortcuts. No compromises.
           </p>
         </div>
