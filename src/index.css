@@ -1,4 +1,17 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap');
+
+/* Landing design system variables (used by policy pages and landing) */
+:root {
+  --bg: 0 0% 4%;
+  --surface: 0 0% 7%;
+  --text: 0 0% 95%;
+  --muted: 0 0% 48%;
+  --faint: 0 0% 22%;
+  --stroke: 0 0% 11%;
+  --grad-a: #8AAFD4;
+  --grad-b: #4E85BF;
+}
+
 
 :root {
   /* ─── Colors ─── */

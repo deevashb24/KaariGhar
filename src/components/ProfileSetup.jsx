@@ -36,7 +36,7 @@ export default function ProfileSetup({ onComplete }) {
             updateUser(res.data);
             toast.success('Profile completed! 🎉');
             onComplete();
-        } catch (err) {
+        } catch {
             toast.error('Failed to save profile');
         } finally {
             setSaving(false);

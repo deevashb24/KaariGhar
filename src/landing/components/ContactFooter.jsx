@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useNavigate } from 'react-router-dom';
 import Hls from 'hls.js';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -13,9 +14,16 @@ const SOCIALS = [
   { label: 'LinkedIn',   href: 'https://linkedin.com/company/kaarighar' },
 ];
 
+const POLICIES = [
+  { label: 'Privacy Policy',   href: '/privacy' },
+  { label: 'Terms of Service', href: '/terms' },
+  { label: 'Cookie Policy',    href: '/cookies' },
+];
+
 export default function ContactFooter() {
   const sectionRef = useRef(null);
   const videoRef   = useRef(null);
+  const navigate   = useNavigate();
 
   /* ── HLS video ── */
   useEffect(() => {
@@ -104,6 +112,43 @@ export default function ContactFooter() {
             Tell us about your vision and we will answer with possibility.
           </p>
 
+          {/* ── Auth CTA buttons ── */}
+          <div
+            className="footer-reveal opacity-0 flex flex-col sm:flex-row items-center justify-center gap-4"
+            style={{ marginBottom: '2.5rem' }}
+          >
+            <button
+              id="footer-get-started-btn"
+              onClick={() => navigate('/auth')}
+              className="group accent-gradient text-white inline-flex items-center gap-3
+                px-10 py-5 rounded-full text-sm font-semibold uppercase tracking-[0.2em]
+                transition-all duration-400 hover:shadow-[0_0_50px_rgba(138,175,212,0.35)]
+                hover:scale-105 active:scale-95"
+              data-cursor-hover
+            >
+              <span>Get Started</span>
+              <span className="text-base transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
+                ↗
+              </span>
+            </button>
+
+            <button
+              id="footer-login-btn"
+              onClick={() => navigate('/auth')}
+              className="group grad-border relative inline-flex items-center gap-3
+                px-10 py-5 rounded-full border text-sm font-medium uppercase tracking-[0.2em]
+                transition-all duration-400 hover:shadow-[0_0_50px_rgba(138,175,212,0.2)]
+                hover:bg-white/5"
+              style={{
+                color: 'hsl(var(--text))',
+                borderColor: 'rgba(255,255,255,0.12)',
+              }}
+              data-cursor-hover
+            >
+              <span>Login</span>
+            </button>
+          </div>
+
           {/* Email pill */}
           <div className="footer-reveal opacity-0">
             <a
@@ -132,7 +177,7 @@ export default function ContactFooter() {
         <div className="hr-subtle" style={{ marginBottom: '3.5rem' }} />
 
         {/* Footer bar */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6 flex-wrap">
           {/* Brand */}
           <div className="flex items-center gap-3">
             <span
@@ -147,6 +192,22 @@ export default function ContactFooter() {
             </span>
             <span style={{ color: 'hsl(var(--faint))' }}>·</span>
             <span className="eyebrow">© 2024</span>
+          </div>
+
+          {/* Policy links */}
+          <div className="flex items-center gap-6 flex-wrap justify-center">
+            {POLICIES.map((p) => (
+              <button
+                key={p.label}
+                onClick={() => navigate(p.href)}
+                className="eyebrow transition-colors duration-200 bg-transparent border-none cursor-pointer"
+                style={{ color: 'hsl(var(--faint))' }}
+                onMouseEnter={(e) => e.currentTarget.style.color = 'hsl(var(--muted))'}
+                onMouseLeave={(e) => e.currentTarget.style.color = 'hsl(var(--faint))'}
+              >
+                {p.label}
+              </button>
+            ))}
           </div>
 
           {/* Status */}

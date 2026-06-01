@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import Hls from 'hls.js';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -15,9 +16,8 @@ export default function Hero() {
   const videoRef    = useRef(null);
   const overlayRef  = useRef(null);
   const headlineRef = useRef(null);
-  const subRef      = useRef(null);
-  const ctaRef      = useRef(null);
   const [roleIndex, setRoleIndex] = useState(0);
+  const navigate = useNavigate();
 
   /* ── HLS video init ── */
   useEffect(() => {
@@ -222,25 +222,37 @@ export default function Hero() {
 
         {/* CTA row */}
         <div className="hero-ctas flex flex-col sm:flex-row items-center gap-4 opacity-0">
-          <a
-            href="#spaces"
+          <button
+            id="hero-get-started-btn"
+            onClick={() => navigate('/auth')}
             className="btn-magnetic accent-gradient text-white px-8 py-4 rounded-full
               text-xs font-semibold uppercase tracking-[0.2em]
-              hover:shadow-[0_0_40px_rgba(138,175,212,0.4)] transition-shadow duration-400"
+              hover:shadow-[0_0_40px_rgba(138,175,212,0.4)] transition-all duration-400
+              hover:scale-105 active:scale-95"
           >
-            Explore Collections
-          </a>
-          <a
-            href="#materials"
+            Get Started ↗
+          </button>
+          <button
+            id="hero-login-btn"
+            onClick={() => navigate('/auth')}
             className="btn-magnetic grad-border px-8 py-4 rounded-full
               text-xs font-semibold uppercase tracking-[0.2em]
-              border transition-all duration-300"
+              border transition-all duration-300 hover:bg-white/5"
             style={{
               color: 'hsl(var(--text))',
               borderColor: 'rgba(255,255,255,0.15)',
             }}
           >
-            View Materials
+            Login
+          </button>
+          <a
+            href="#spaces"
+            className="text-[11px] font-medium uppercase tracking-[0.18em] transition-colors duration-200"
+            style={{ color: 'hsl(var(--faint))' }}
+            onMouseEnter={(e) => e.currentTarget.style.color = 'hsl(var(--muted))'}
+            onMouseLeave={(e) => e.currentTarget.style.color = 'hsl(var(--faint))'}
+          >
+            Explore Collections →
           </a>
         </div>
       </div>

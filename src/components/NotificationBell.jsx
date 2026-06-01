@@ -18,7 +18,7 @@ export default function NotificationBell() {
         try {
             const res = await api.get('/notifications');
             setData(res.data);
-        } catch (e) { /* silent */ }
+        } catch { /* silent */ }
     };
 
     useEffect(() => {

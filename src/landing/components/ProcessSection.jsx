@@ -89,7 +89,7 @@ export default function ProcessSection() {
             background: 'hsl(var(--stroke))',
           }}
         >
-          {STEPS.map((s, i) => (
+          {STEPS.map((s) => (
             <div
               key={s.no}
               className="proc-card group"

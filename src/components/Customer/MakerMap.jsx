@@ -19,7 +19,7 @@ export default function MakerMap({ onMakersLoaded, highlightMakerId }) {
     const popupRef = useRef(null);
     const addCustomLayersRef = useRef(() => { });
 
-    const [mapLoaded, setMapLoaded] = useState(false);
+    const [, setMapLoaded] = useState(false);
     const [makers, setMakers] = useState(null);
     const [loading, setLoading] = useState(true);
 

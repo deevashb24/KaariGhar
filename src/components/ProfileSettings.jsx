@@ -34,7 +34,7 @@ export default function ProfileSettings() {
                     deliveryRadius: res.data.deliveryRadius || '',
                     availability: res.data.availability || 'AVAILABLE',
                 });
-            } catch (err) {
+            } catch {
                 toast.error('Failed to load profile');
             } finally {
                 setLoading(false);
@@ -66,7 +66,7 @@ export default function ProfileSettings() {
             const res = await api.put('/profile', payload);
             updateUser(res.data);
             toast.success('Profile updated! ✓');
-        } catch (err) {
+        } catch {
             toast.error('Failed to save profile');
         } finally {
             setSaving(false);
@@ -186,7 +186,7 @@ export default function ProfileSettings() {
                                         try {
                                             await api.put('/maker/availability', { availability: status });
                                             toast.success(`Status: ${status.replace('_', ' ')}`);
-                                        } catch (err) { toast.error('Failed to update'); }
+                                        } catch { toast.error('Failed to update'); }
                                     }}
                                 >
                                     {status === 'AVAILABLE' && '🟢 Available'}

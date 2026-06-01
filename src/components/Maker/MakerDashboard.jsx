@@ -48,7 +48,7 @@ export default function MakerDashboard() {
             const profile = await api.get('/profile');
             const res = await api.get(`/makers/${profile.data.id}/portfolio`);
             setPortfolio(res.data);
-        } catch (err) { /* silent */ }
+        } catch { /* silent */ }
     };
 
     const addPortfolioItem = async () => {
@@ -58,7 +58,7 @@ export default function MakerDashboard() {
             toast.success('Portfolio item added!');
             setPortfolioForm({ imageUrl: '', caption: '', category: '' });
             fetchPortfolio();
-        } catch (err) { toast.error('Failed to add item'); }
+        } catch { toast.error('Failed to add item'); }
     };
 
     const deletePortfolioItem = async (id) => {
@@ -66,7 +66,7 @@ export default function MakerDashboard() {
             await api.delete(`/portfolio/${id}`);
             toast.success('Item removed');
             fetchPortfolio();
-        } catch (err) { toast.error('Failed to delete'); }
+        } catch { toast.error('Failed to delete'); }
     };
 
     const handleQuoteSubmit = async (e) => {
@@ -177,7 +177,7 @@ export default function MakerDashboard() {
                                                         </div>
                                                     );
                                                 }
-                                            } catch (e) { return null; }
+                                            } catch { return null; }
                                         })()}
 
                                         <p style={{ color: 'var(--text-light)', lineHeight: '1.5', marginTop: '10px', marginBottom: '10px' }}>{req.description}</p>
@@ -195,7 +195,7 @@ export default function MakerDashboard() {
                                                         {s.notes && <p style={{ width: '100%', fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)', marginTop: '4px' }}>Notes: {s.notes}</p>}
                                                     </div>
                                                 );
-                                            } catch (e) { return null; }
+                                            } catch { return null; }
                                         })()}
 
                                         {req.aiInsights && (

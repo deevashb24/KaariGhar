@@ -50,7 +50,7 @@ export default function CustomerDashboard() {
         try {
             const res = await api.get('/customer/stats');
             setStats(res.data);
-        } catch (err) { /* silent */ }
+        } catch { /* silent */ }
     };
 
     const fetchFavorites = async () => {
@@ -58,7 +58,7 @@ export default function CustomerDashboard() {
             const res = await api.get('/favorites');
             setFavorites(res.data);
             setFavoriteIds(new Set(res.data.map(m => m.id)));
-        } catch (err) { /* silent */ }
+        } catch { /* silent */ }
     };
 
     useEffect(() => {
@@ -139,7 +139,7 @@ export default function CustomerDashboard() {
                 toast.success('Removed from favorites');
             }
             fetchFavorites();
-        } catch (err) {
+        } catch {
             toast.error('Failed to update favorite');
         }
     };
@@ -317,7 +317,7 @@ export default function CustomerDashboard() {
                                         </div>
                                     );
                                 }
-                            } catch (e) { return null; }
+                            } catch { return null; }
                         })()}
 
                         {selectedRequest.specs && (() => {
@@ -332,7 +332,7 @@ export default function CustomerDashboard() {
                                         ))}
                                     </div>
                                 );
-                            } catch (e) { return null; }
+                            } catch { return null; }
                         })()}
 
                         {(selectedRequest.status === 'IN_PROGRESS' || selectedRequest.status === 'COMPLETED') && (

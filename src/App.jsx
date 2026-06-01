@@ -1,7 +1,7 @@
 import { useState, useContext } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from './AuthContext';
-import { t, LANGUAGES } from './i18n';
+import { LANGUAGES } from './i18n';
 import Hero from './components/Hero';
 import HowItWorks from './components/HowItWorks';
 import FeaturedMakers from './components/FeaturedMakers';
@@ -12,7 +12,11 @@ import MakerDashboard from './components/Maker/MakerDashboard';
 import ProfileSetup from './components/ProfileSetup';
 import NotificationBell from './components/NotificationBell';
 import LandingPage from './landing/LandingPage';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfService from './pages/TermsOfService';
+import CookiePolicy from './pages/CookiePolicy';
 import './App.css';
+
 
 // Protected Route Wrapper
 const ProtectedRoute = ({ children, allowedRole }) => {
@@ -23,7 +27,7 @@ const ProtectedRoute = ({ children, allowedRole }) => {
 };
 
 // Simplified Navbar for Portals
-const AppNavbar = ({ lang, setLang }) => {
+const AppNavbar = () => {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -62,7 +66,8 @@ export default function App() {
   const location = useLocation();
   const [showProfileSetup, setShowProfileSetup] = useState(false);
 
-  const isLandingPage = location.pathname === '/';
+  const isLandingPage   = location.pathname === '/';
+  const isPolicyPage    = ['/privacy', '/terms', '/cookies'].includes(location.pathname);
 
   // Check if profile onboarding is needed
   const needsOnboarding = user && user.isProfileComplete === false;
@@ -86,6 +91,17 @@ export default function App() {
   // Landing page gets full screen treatment — no legacy chrome
   if (isLandingPage) {
     return <LandingPage />;
+  }
+
+  // Policy pages get full screen treatment with their own nav
+  if (isPolicyPage) {
+    return (
+      <Routes>
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms"   element={<TermsOfService />} />
+        <Route path="/cookies" element={<CookiePolicy />} />
+      </Routes>
+    );
   }
 
   return (
@@ -128,3 +144,4 @@ export default function App() {
     </div>
   );
 }
+
