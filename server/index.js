@@ -469,6 +469,10 @@ app.put('/api/maker/availability', verifyToken, async (req, res) => {
     } catch (error) { res.status(500).json({ error: 'Server error' }); }
 });
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => {
+        console.log(`Server is running on port ${PORT}`);
+    });
+}
+
+export default app;
