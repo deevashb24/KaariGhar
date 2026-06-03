@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const WORDS   = ['Design.', 'Craft.', 'Endure.', 'Resonate.'];
 const DURATION = 2800; // ms for 0→100
