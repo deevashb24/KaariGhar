@@ -271,18 +271,22 @@ export default function Hero() {
           </button>
 
           {/* TERTIARY — text link, lowest emphasis */}
-          <a
-            href="#spaces"
+          <button
+            onClick={() => {
+              const el = document.getElementById('spaces');
+              if (!el) return;
+              window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 72, behavior: 'smooth' });
+            }}
             className="transition-all duration-200 flex items-center gap-2"
-            style={{ color: 'rgba(255,255,255,0.32)', fontSize: '0.7rem', letterSpacing: '0.22em', textTransform: 'uppercase', fontWeight: 500 }}
+            style={{ color: 'rgba(255,255,255,0.32)', fontSize: '0.7rem', letterSpacing: '0.22em', textTransform: 'uppercase', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
             onMouseEnter={(e) => e.currentTarget.style.color = 'rgba(138,175,212,0.75)'}
             onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.32)'}
           >
             Explore Collections
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <path d="M2 10L10 2M10 2H4M10 2V8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M6 2v8M2 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-          </a>
+          </button>
         </div>
       </div>
 

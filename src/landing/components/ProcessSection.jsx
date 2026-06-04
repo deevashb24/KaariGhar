@@ -58,7 +58,7 @@ export default function ProcessSection() {
 
   return (
     <section
-      id="journal"
+      id="process"
       ref={ref}
       className="section-pad border-t"
       style={{ background: 'hsl(var(--bg))', borderColor: 'hsl(var(--stroke))' }}

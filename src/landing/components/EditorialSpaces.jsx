@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useNavigate } from 'react-router-dom';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -39,6 +40,13 @@ const BLOCKS = [
     imageLabel: 'Woven Linen Suite, Himachal 2024',
   },
 ];
+
+function scrollTo(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const top = el.getBoundingClientRect().top + window.scrollY - 72;
+  window.scrollTo({ top, behavior: 'smooth' });
+}
 
 function Block({ block, index }) {
   const ref    = useRef(null);
@@ -164,9 +172,11 @@ function Block({ block, index }) {
         </p>
 
         {/* CTA link */}
-        <a
-          href={block.href}
-          className="txt-reveal group"
+        <button
+          onClick={() => {
+            const id = block.href.replace('#', '');
+            scrollTo(id);
+          }}
           style={{
             opacity: 0,
             display: 'inline-flex',
@@ -174,7 +184,13 @@ function Block({ block, index }) {
             gap: '1rem',
             color: 'hsl(var(--text))',
             width: 'fit-content',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            padding: 0,
+            fontFamily: 'inherit',
           }}
+          className="txt-reveal group"
           onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--grad-a)'; }}
           onMouseLeave={(e) => { e.currentTarget.style.color = 'hsl(var(--text))'; }}
         >
@@ -191,12 +207,12 @@ function Block({ block, index }) {
             }}
             ref={(el) => {
               if (!el) return;
-              const a = el.parentElement;
-              a.addEventListener('mouseenter', () => { el.style.width = '4rem'; });
-              a.addEventListener('mouseleave', () => { el.style.width = '2.5rem'; });
+              const btn = el.parentElement;
+              btn.addEventListener('mouseenter', () => { el.style.width = '4rem'; });
+              btn.addEventListener('mouseleave', () => { el.style.width = '2.5rem'; });
             }}
           />
-        </a>
+        </button>
       </div>
     </article>
   );
