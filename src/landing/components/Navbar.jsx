@@ -93,10 +93,16 @@ export default function Navbar() {
           <button
             id="nav-signup-btn"
             onClick={() => navigate('/auth')}
-            className="accent-gradient text-white px-5 py-2.5 rounded-full
-              text-[11px] font-semibold uppercase tracking-[0.18em]
-              transition-all duration-300 hover:shadow-[0_0_24px_rgba(138,175,212,0.4)]
-              hover:scale-105 active:scale-95"
+            className="accent-gradient text-white rounded-full
+              font-semibold uppercase
+              transition-all duration-300 hover:shadow-[0_0_28px_rgba(138,175,212,0.5)]
+              hover:scale-[1.05] active:scale-95"
+            style={{
+              fontSize: '0.72rem',
+              padding: '11px 24px',
+              letterSpacing: '0.16em',
+              boxShadow: '0 4px 20px rgba(78,133,191,0.35)',
+            }}
           >
             Sign Up ↗
           </button>

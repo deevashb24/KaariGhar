@@ -221,38 +221,67 @@ export default function Hero() {
         </p>
 
         {/* CTA row */}
-        <div className="hero-ctas flex flex-col sm:flex-row items-center gap-4 opacity-0">
+        <div className="hero-ctas flex flex-col sm:flex-row items-center gap-5 opacity-0">
+          {/* PRIMARY — largest, brightest, most prominent */}
           <button
             id="hero-get-started-btn"
             onClick={() => navigate('/auth')}
-            className="btn-magnetic accent-gradient text-white px-8 py-4 rounded-full
-              text-xs font-semibold uppercase tracking-[0.2em]
-              hover:shadow-[0_0_40px_rgba(138,175,212,0.4)] transition-all duration-400
-              hover:scale-105 active:scale-95"
+            className="btn-magnetic accent-gradient text-white rounded-full
+              font-semibold uppercase tracking-[0.18em]
+              hover:shadow-[0_0_60px_rgba(138,175,212,0.55)] transition-all duration-300
+              hover:scale-[1.06] active:scale-95"
+            style={{
+              fontSize: '0.85rem',
+              padding: '20px 52px',
+              letterSpacing: '0.2em',
+              boxShadow: '0 8px 40px rgba(78,133,191,0.45), 0 2px 12px rgba(0,0,0,0.4)',
+            }}
           >
             Get Started ↗
           </button>
+
+          {/* SECONDARY — clearly outlined, smaller than primary */}
           <button
             id="hero-login-btn"
             onClick={() => navigate('/auth')}
-            className="btn-magnetic grad-border px-8 py-4 rounded-full
-              text-xs font-semibold uppercase tracking-[0.2em]
-              border transition-all duration-300 hover:bg-white/5"
+            className="btn-magnetic rounded-full
+              font-medium uppercase transition-all duration-300
+              hover:bg-white/8 active:scale-95"
             style={{
-              color: 'hsl(var(--text))',
-              borderColor: 'rgba(255,255,255,0.15)',
+              fontSize: '0.78rem',
+              padding: '18px 40px',
+              letterSpacing: '0.18em',
+              color: 'rgba(255,255,255,0.75)',
+              border: '1.5px solid rgba(255,255,255,0.22)',
+              background: 'rgba(255,255,255,0.04)',
+              backdropFilter: 'blur(8px)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = 'rgba(138,175,212,0.6)';
+              e.currentTarget.style.color = 'rgba(255,255,255,1)';
+              e.currentTarget.style.background = 'rgba(138,175,212,0.08)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.22)';
+              e.currentTarget.style.color = 'rgba(255,255,255,0.75)';
+              e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
             }}
           >
             Login
           </button>
+
+          {/* TERTIARY — text link, lowest emphasis */}
           <a
             href="#spaces"
-            className="text-[11px] font-medium uppercase tracking-[0.18em] transition-colors duration-200"
-            style={{ color: 'hsl(var(--faint))' }}
-            onMouseEnter={(e) => e.currentTarget.style.color = 'hsl(var(--muted))'}
-            onMouseLeave={(e) => e.currentTarget.style.color = 'hsl(var(--faint))'}
+            className="transition-all duration-200 flex items-center gap-2"
+            style={{ color: 'rgba(255,255,255,0.32)', fontSize: '0.7rem', letterSpacing: '0.22em', textTransform: 'uppercase', fontWeight: 500 }}
+            onMouseEnter={(e) => e.currentTarget.style.color = 'rgba(138,175,212,0.75)'}
+            onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.32)'}
           >
-            Explore Collections →
+            Explore Collections
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M2 10L10 2M10 2H4M10 2V8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </a>
         </div>
       </div>
