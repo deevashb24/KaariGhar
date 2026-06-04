@@ -1,6 +1,6 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 const LINKS = [
   { label: 'Spaces',    href: 'spaces' },
@@ -21,7 +21,6 @@ function scrollTo(id) {
 export default function Navbar() {
   const [scrolled,      setScrolled]      = useState(false);
   const [activeSection, setActiveSection] = useState('');
-  const [mobileOpen,    setMobileOpen]    = useState(false);
   const navigate = useNavigate();
 
   /* ── Scroll depth ── */
@@ -46,12 +45,6 @@ export default function Navbar() {
     return () => observers.forEach(o => o?.disconnect());
   }, []);
 
-  /* ── Close mobile menu on resize ── */
-  useEffect(() => {
-    const onResize = () => { if (window.innerWidth >= 768) setMobileOpen(false); };
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, []);
 
   const navBg = scrolled
     ? 'rgba(0,0,0,0.85)'
@@ -256,132 +249,9 @@ export default function Navbar() {
               Get Started ↗
             </button>
 
-            {/* Hamburger */}
-            <button
-              onClick={() => setMobileOpen(v => !v)}
-              aria-label="Menu"
-              className="md:hidden"
-              style={{
-                background: 'rgba(255,255,255,0.06)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '10px',
-                padding: '9px 11px',
-                cursor: 'pointer',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '5px',
-                outline: 'none',
-              }}
-            >
-              {[0, 1, 2].map(i => (
-                <span key={i} style={{
-                  display: 'block',
-                  width: i === 1 ? '12px' : '18px',
-                  height: '1.5px',
-                  background: 'rgba(255,255,255,0.65)',
-                  borderRadius: '2px',
-                  marginLeft: i === 1 ? '3px' : 0,
-                }} />
-              ))}
-            </button>
-          </div>
-        </div>
+          </div>  {/* end auth buttons */}
+        </div>  {/* end inner flex */}
       </motion.header>
-
-      {/* ── Mobile dropdown ── */}
-      <AnimatePresence>
-        {mobileOpen && (
-          <motion.div
-            style={{ position: 'fixed', inset: 0, zIndex: 199 }}
-            className="md:hidden"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.18 }}
-          >
-            {/* Backdrop */}
-            <div
-              style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(10px)' }}
-              onClick={() => setMobileOpen(false)}
-            />
-
-            <motion.div
-              style={{
-                position: 'absolute',
-                top: '80px',
-                left: '12px', right: '12px',
-                background: 'rgba(8,8,8,0.96)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                borderRadius: '18px',
-                padding: '10px',
-                backdropFilter: 'blur(24px)',
-              }}
-              initial={{ y: -16, opacity: 0, scale: 0.97 }}
-              animate={{ y: 0, opacity: 1, scale: 1 }}
-              exit={{ y: -16, opacity: 0, scale: 0.97 }}
-              transition={{ duration: 0.22, ease: 'easeOut' }}
-            >
-              {LINKS.map(({ label, href }) => (
-                <button
-                  key={href}
-                  onClick={() => { scrollTo(href); setMobileOpen(false); }}
-                  style={{
-                    width: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '15px 18px',
-                    borderRadius: '10px',
-                    fontSize: '13px',
-                    fontWeight: 500,
-                    letterSpacing: '0.1em',
-                    textTransform: 'uppercase',
-                    color: 'rgba(255,255,255,0.65)',
-                    background: 'transparent',
-                    border: 'none',
-                    cursor: 'pointer',
-                    transition: 'all 0.18s ease',
-                    fontFamily: 'Inter, sans-serif',
-                    textAlign: 'left',
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = '#fff'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.65)'; }}
-                >
-                  {label}
-                  <span style={{ opacity: 0.3, fontSize: '16px' }}>↓</span>
-                </button>
-              ))}
-
-              <div style={{ height: '1px', background: 'rgba(255,255,255,0.06)', margin: '6px 4px' }} />
-
-              <div style={{ display: 'flex', gap: '8px', padding: '6px 4px 2px' }}>
-                <button
-                  onClick={() => { navigate('/auth'); setMobileOpen(false); }}
-                  style={{
-                    flex: 1, padding: '13px', borderRadius: '10px',
-                    fontSize: '11px', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase',
-                    color: 'rgba(255,255,255,0.65)', background: 'rgba(255,255,255,0.05)',
-                    border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', fontFamily: 'Inter, sans-serif',
-                  }}
-                >
-                  Login
-                </button>
-                <button
-                  onClick={() => { navigate('/auth'); setMobileOpen(false); }}
-                  style={{
-                    flex: 1, padding: '13px', borderRadius: '10px',
-                    fontSize: '11px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase',
-                    color: '#fff', background: 'linear-gradient(135deg, #8AAFD4, #4E85BF)',
-                    border: 'none', cursor: 'pointer', fontFamily: 'Inter, sans-serif',
-                  }}
-                >
-                  Get Started
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </>
   );
 }

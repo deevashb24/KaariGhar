@@ -114,38 +114,88 @@ export default function ContactFooter() {
 
           {/* ── Auth CTA buttons ── */}
           <div
-            className="footer-reveal opacity-0 flex flex-col sm:flex-row items-center justify-center gap-4"
-            style={{ marginBottom: '2.5rem' }}
+            className="footer-reveal opacity-0"
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '16px',
+              marginBottom: '2.5rem',
+            }}
           >
+            {/* Primary */}
             <button
               id="footer-get-started-btn"
               onClick={() => navigate('/auth')}
-              className="group accent-gradient text-white inline-flex items-center gap-3
-                px-10 py-5 rounded-full text-sm font-semibold uppercase tracking-[0.2em]
-                transition-all duration-400 hover:shadow-[0_0_50px_rgba(138,175,212,0.35)]
-                hover:scale-105 active:scale-95"
               data-cursor-hover
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '10px',
+                padding: '18px 44px',
+                borderRadius: '999px',
+                background: 'linear-gradient(135deg, #8AAFD4 0%, #4E85BF 100%)',
+                border: 'none',
+                color: '#fff',
+                fontSize: '12px',
+                fontWeight: 700,
+                letterSpacing: '0.2em',
+                textTransform: 'uppercase',
+                fontFamily: 'Inter, sans-serif',
+                cursor: 'pointer',
+                transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                boxShadow: '0 8px 40px rgba(78,133,191,0.45)',
+                whiteSpace: 'nowrap',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'scale(1.05)';
+                e.currentTarget.style.boxShadow = '0 12px 56px rgba(78,133,191,0.6)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.boxShadow = '0 8px 40px rgba(78,133,191,0.45)';
+              }}
             >
-              <span>Get Started</span>
-              <span className="text-base transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
-                ↗
-              </span>
+              Get Started
+              <span style={{ fontSize: '15px', lineHeight: 1 }}>↗</span>
             </button>
 
+            {/* Secondary */}
             <button
               id="footer-login-btn"
               onClick={() => navigate('/auth')}
-              className="group grad-border relative inline-flex items-center gap-3
-                px-10 py-5 rounded-full border text-sm font-medium uppercase tracking-[0.2em]
-                transition-all duration-400 hover:shadow-[0_0_50px_rgba(138,175,212,0.2)]
-                hover:bg-white/5"
-              style={{
-                color: 'hsl(var(--text))',
-                borderColor: 'rgba(255,255,255,0.12)',
-              }}
               data-cursor-hover
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                padding: '18px 44px',
+                borderRadius: '999px',
+                background: 'rgba(255,255,255,0.04)',
+                border: '1.5px solid rgba(255,255,255,0.18)',
+                color: 'rgba(255,255,255,0.75)',
+                fontSize: '12px',
+                fontWeight: 600,
+                letterSpacing: '0.2em',
+                textTransform: 'uppercase',
+                fontFamily: 'Inter, sans-serif',
+                cursor: 'pointer',
+                transition: 'all 0.25s ease',
+                whiteSpace: 'nowrap',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = 'rgba(138,175,212,0.55)';
+                e.currentTarget.style.color = '#fff';
+                e.currentTarget.style.background = 'rgba(138,175,212,0.08)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.18)';
+                e.currentTarget.style.color = 'rgba(255,255,255,0.75)';
+                e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
+              }}
             >
-              <span>Login</span>
+              Login
             </button>
           </div>
 
@@ -153,22 +203,36 @@ export default function ContactFooter() {
           <div className="footer-reveal opacity-0">
             <a
               href="mailto:contact@kaarighar.com"
-              className="group grad-border relative inline-flex items-center gap-3
-                px-10 py-5 rounded-full border text-sm font-medium uppercase tracking-[0.2em]
-                transition-all duration-400 hover:shadow-[0_0_50px_rgba(138,175,212,0.2)]"
               style={{
-                color: 'hsl(var(--text))',
-                borderColor: 'rgba(255,255,255,0.12)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '10px',
+                padding: '16px 36px',
+                borderRadius: '999px',
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                color: 'rgba(255,255,255,0.55)',
+                fontSize: '11px',
+                fontWeight: 500,
+                letterSpacing: '0.22em',
+                textTransform: 'uppercase',
+                fontFamily: 'Inter, sans-serif',
+                textDecoration: 'none',
+                transition: 'all 0.25s ease',
+                whiteSpace: 'nowrap',
               }}
               data-cursor-hover
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = 'rgba(138,175,212,0.4)';
+                e.currentTarget.style.color = 'rgba(255,255,255,0.85)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
+                e.currentTarget.style.color = 'rgba(255,255,255,0.55)';
+              }}
             >
-              <span>contact@kaarighar.com</span>
-              <span
-                className="text-base transition-transform duration-200
-                  group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-              >
-                ↗
-              </span>
+              contact@kaarighar.com
+              <span style={{ fontSize: '13px', opacity: 0.6 }}>↗</span>
             </a>
           </div>
         </div>
