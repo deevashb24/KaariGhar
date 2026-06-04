@@ -101,7 +101,7 @@ export default function Manifesto() {
             marginBottom: '5rem',
           }}
         >
-          <p className="eyebrow reveal-target" style={{ opacity: 0 }}>Our Philosophy</p>
+          <p className="eyebrow-accent reveal-target" style={{ opacity: 0 }}>Our Philosophy</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
             <h2 className="display-xl reveal-target" style={{ opacity: 0, color: 'hsl(var(--text))' }}>
               The Four <em style={{ color: 'var(--grad-a)' }}>Tenets</em>

@@ -74,7 +74,7 @@ export default function StatsSection() {
         {/* Header */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', marginBottom: '5rem' }}>
           <div>
-            <p className="eyebrow mb-5">The Numbers</p>
+            <p className="eyebrow-accent mb-5">The Numbers</p>
             <h2 className="display-xl" style={{ color: 'hsl(var(--text))' }}>
               A Decade of<br />
               <em style={{ color: 'var(--grad-a)' }}>Deliberate</em> Work

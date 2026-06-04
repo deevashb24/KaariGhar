@@ -19,16 +19,16 @@
   --surface: 0 0% 7%;
   --surface-2: 0 0% 10%;
   --text: 0 0% 95%;
-  --muted: 0 0% 48%;
-  --faint: 0 0% 22%;
-  --stroke: 0 0% 11%;
+  --muted: 0 0% 55%;    /* ↑ Lifted from 48% for better readability */
+  --faint: 0 0% 28%;    /* ↑ Lifted from 22% for better readability */
+  --stroke: 0 0% 13%;   /* ↑ Slightly brighter hairlines */
 
   /* Accent steel-blue gradient */
   --grad-a: #8AAFD4;
   --grad-b: #4E85BF;
 
   /* Spacing rhythm */
-  --section-y: clamp(6rem, 12vw, 10rem);
+  --section-y: clamp(7rem, 13vw, 11rem); /* ↑ More breathing room */
   --container-max: 1400px;
   --container-px: clamp(1.5rem, 5vw, 5rem);
 }
@@ -93,19 +93,41 @@ a { text-decoration: none; color: inherit; }
 
 .eyebrow {
   font-family: 'Inter', sans-serif;
-  font-size: 0.65rem;
-  font-weight: 500;
-  letter-spacing: 0.4em;
+  font-size: 0.7rem;       /* ↑ slightly larger */
+  font-weight: 600;        /* ↑ bolder */
+  letter-spacing: 0.38em;
   text-transform: uppercase;
   color: hsl(var(--muted));
+}
+
+/* Gold-tinted eyebrow variant for section openers */
+.eyebrow-accent {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.38em;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, var(--grad-a), var(--grad-b));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .body-lg {
   font-family: 'Inter', sans-serif;
   font-size: clamp(1rem, 1.25vw, 1.15rem);
-  line-height: 1.8;
+  line-height: 1.85;
   color: hsl(var(--muted));
   font-weight: 300;
+}
+
+/* Slightly bolder body copy for better readability at small sizes */
+.body-md {
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(0.9rem, 1.1vw, 1.05rem);
+  line-height: 1.75;
+  color: hsl(var(--muted));
+  font-weight: 400;
 }
 
 /* ─────────────────────────────────────────── */
@@ -256,6 +278,35 @@ a { text-decoration: none; color: inherit; }
   align-items: center;
   justify-content: center;
   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Section divider accent — used between major sections */
+.section-divider {
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    hsl(var(--stroke)) 20%,
+    hsl(var(--stroke)) 80%,
+    transparent 100%
+  );
+  margin: 0;
+}
+
+/* Pill tag — for section labels like eyebrows in cards */
+.pill-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 99px;
+  border: 1px solid rgba(138, 175, 212, 0.2);
+  background: rgba(138, 175, 212, 0.06);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: #8AAFD4;
 }
 
 /* ─────────────────────────────────────────── */

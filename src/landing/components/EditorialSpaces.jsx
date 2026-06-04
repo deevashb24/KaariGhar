@@ -237,7 +237,7 @@ export default function EditorialSpaces() {
         >
           {/* Top row */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <p className="eyebrow reveal-target" style={{ opacity: 0 }}>Our Collections</p>
+            <p className="eyebrow-accent reveal-target" style={{ opacity: 0 }}>Our Collections</p>
             <h2 className="display-xl reveal-target" style={{ opacity: 0, color: 'hsl(var(--text))' }}>
               Spaces We <em style={{ color: 'var(--grad-a)' }}>Build</em>
             </h2>

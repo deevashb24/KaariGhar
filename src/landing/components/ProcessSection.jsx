@@ -68,7 +68,7 @@ export default function ProcessSection() {
         {/* Header */}
         <div className="proc-header" style={{ display: 'flex', flexDirection: 'column', gap: '2rem', marginBottom: '5rem' }}>
           <div>
-            <p className="eyebrow mb-5 reveal-target" style={{ opacity: 0 }}>How We Work</p>
+            <p className="eyebrow-accent mb-5 reveal-target" style={{ opacity: 0 }}>How We Work</p>
             <h2 className="display-xl reveal-target" style={{ opacity: 0, color: 'hsl(var(--text))' }}>
               The Process<br />
               <em style={{ color: 'var(--grad-a)' }}>Behind</em> the Space
