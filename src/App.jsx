@@ -26,8 +26,8 @@ const ProtectedRoute = ({ children, allowedRole }) => {
   return children;
 };
 
-// Simplified Navbar for Portals
-const AppNavbar = () => {
+// Simplified Navbar for Portals (lang/setLang reserved for future i18n)
+const AppNavbar = ({ lang, setLang }) => {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
 

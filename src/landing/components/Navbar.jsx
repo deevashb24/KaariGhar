@@ -85,7 +85,7 @@ export default function Navbar() {
 
           {/* ── Wordmark logo (no icon) ── */}
           <a
-            href="#home"
+            href="/"
             onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
             style={{
               display: 'flex',
