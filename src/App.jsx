@@ -9,6 +9,7 @@ import Footer from './components/Footer';
 import AuthTabs from './components/Auth/AuthTabs';
 import CustomerDashboard from './components/Customer/CustomerDashboard';
 import MakerDashboard from './components/Maker/MakerDashboard';
+import AdminDashboard from './components/Admin/AdminDashboard';
 import ProfileSetup from './components/ProfileSetup';
 import NotificationBell from './components/NotificationBell';
 import LandingPage from './landing/LandingPage';
@@ -74,7 +75,11 @@ export default function App() {
 
   const handleStartOrder = () => {
     if (user) {
-      navigate(user.role === 'CUSTOMER' ? '/customer' : '/maker');
+      if (user.role === 'ADMIN') {
+        navigate('/admin');
+      } else {
+        navigate(user.role === 'CUSTOMER' ? '/customer' : '/maker');
+      }
     } else {
       navigate('/auth');
     }
@@ -132,6 +137,13 @@ export default function App() {
           <Route path="/maker/*" element={
             <ProtectedRoute allowedRole="MAKER">
               <MakerDashboard />
+            </ProtectedRoute>
+          } />
+
+          {/* Admin Portal */}
+          <Route path="/admin/*" element={
+            <ProtectedRoute allowedRole="ADMIN">
+              <AdminDashboard />
             </ProtectedRoute>
           } />
         </Routes>

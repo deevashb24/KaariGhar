@@ -72,10 +72,19 @@ export default function MakerProfileModal({ makerId, onClose }) {
                             <div style={{ flex: 1 }}>
                                 <h2 style={{ margin: '0 0 4px', color: 'var(--gold)', fontFamily: "'Playfair Display', serif" }}>{maker.name}</h2>
                                 {maker.shopName && <p style={{ margin: '0 0 8px', color: 'var(--text-muted)', fontSize: '0.9rem' }}>{maker.shopName}</p>}
-                                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '4px' }}>
                                     {maker.city && <span className="maker-modal-tag"><MapPin size={12} /> {maker.city}</span>}
                                     <span className="maker-modal-tag"><Calendar size={12} /> Joined {new Date(maker.createdAt).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}</span>
-                                    <span className="maker-modal-tag maker-modal-tag--green"><Shield size={12} /> Trust Verified</span>
+                                    
+                                    {maker.verificationLevel && maker.verificationLevel !== 'UNVERIFIED' && (
+                                        <span className="maker-modal-tag" style={{ background: 'rgba(212,175,55,0.15)', color: 'var(--gold)' }}>
+                                            <Shield size={12} /> {maker.verificationLevel.replace('_', ' ')}
+                                        </span>
+                                    )}
+                                    {maker.isGstVerified && <span className="maker-modal-tag maker-modal-tag--green">✓ GST Verified</span>}
+                                    {maker.isIdVerified && <span className="maker-modal-tag maker-modal-tag--green">✓ ID Verified</span>}
+                                    {maker.isShopVerified && <span className="maker-modal-tag maker-modal-tag--green">✓ Shop Visit</span>}
+
                                     {maker.yearsExperience && <span className="maker-modal-tag"><Award size={12} /> {maker.yearsExperience}+ yrs</span>}
                                     {maker.availability && <span className="maker-modal-tag">{availLabel[maker.availability] || maker.availability}</span>}
                                 </div>

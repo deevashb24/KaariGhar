@@ -28,8 +28,17 @@ model User {
   workingHours    String?     // e.g. "Mon-Sat, 9 AM - 7 PM"
   deliveryRadius  String?     // e.g. "50 km"
   availability    String      @default("AVAILABLE") // AVAILABLE, BUSY, ON_VACATION
+  verificationLevel String    @default("UNVERIFIED") // UNVERIFIED, VERIFIED, PREFERRED, TOP_RATED
+  isGstVerified   Boolean     @default(false)
+  isIdVerified    Boolean     @default(false)
+  isShopVerified  Boolean     @default(false)
   latitude        Float?
   longitude       Float?
+  // SLA reputation metrics
+  avgResponseTime Float?      @default(120) // in minutes
+  completionRate  Float?      @default(100) // percentage
+  onTimeDeliveryRate Float?   @default(100) // percentage
+  totalJobsCompleted Int      @default(0)
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 
@@ -51,6 +60,11 @@ model Request {
   customer        User        @relation("CustomerRequests", fields: [customerId], references: [id])
   title           String
   description     String
+  category        String?
+  roomType        String?
+  styleMood       String?
+  spaceSize       String?
+  budgetRange     String?
   specs           String?     // Structured JSON string of specifications
   budget          Float?
   status          String      @default("OPEN") // OPEN, QUOTED, IN_PROGRESS, COMPLETED
@@ -70,6 +84,12 @@ model Quote {
   makerId         String
   maker           User        @relation("MakerQuotes", fields: [makerId], references: [id])
   price           Float
+  materialsCost   Float?
+  laborCost       Float?
+  hardwareCost    Float?
+  deliveryCost    Float?
+  gstAmount       Float?
+  warrantyTerms   String?
   message         String
   proposedTimeline String?
   status          String      @default("PENDING") // PENDING, ACCEPTED, REJECTED
@@ -99,6 +119,12 @@ model Milestone {
   description     String
   amount          Float
   status          String      @default("PENDING") // PENDING, COMPLETED, PAID
+  // Photo proof & Dispute fields
+  photoUrl        String?
+  photoVerified   Boolean     @default(false)
+  photoUploadedAt DateTime?
+  isDisputed      Boolean     @default(false)
+  disputeReason   String?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 }

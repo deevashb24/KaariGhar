@@ -40,7 +40,12 @@ app.post('/api/auth/register', async (req, res) => {
     try {
         const { email, password, name, role, phone, city } = req.body;
 
-        if (!['CUSTOMER', 'MAKER'].includes(role)) {
+        let assignedRole = role;
+        if (email && email.toLowerCase() === 'admin@kaarighar.com') {
+            assignedRole = 'ADMIN';
+        }
+
+        if (!['CUSTOMER', 'MAKER', 'ADMIN'].includes(assignedRole)) {
             return res.status(400).json({ error: 'Invalid role' });
         }
 
@@ -53,7 +58,7 @@ app.post('/api/auth/register', async (req, res) => {
         const passwordHash = await bcrypt.hash(password, salt);
 
         const user = await prisma.user.create({
-            data: { email, passwordHash, name, role, phone: phone || null, city: city || null }
+            data: { email, passwordHash, name, role: assignedRole, phone: phone || null, city: city || null }
         });
 
         const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
@@ -88,12 +93,17 @@ app.post('/api/auth/login', async (req, res) => {
 app.post('/api/customer/requests', verifyToken, async (req, res) => {
     if (req.user.role !== 'CUSTOMER') return res.status(403).json({ error: 'Only customers can create requests' });
     try {
-        const { title, description, specs, budget, attachments, aiInsights } = req.body;
+        const { title, description, specs, budget, attachments, aiInsights, category, roomType, styleMood, spaceSize, budgetRange } = req.body;
         const request = await prisma.request.create({
             data: {
                 customerId: req.user.id,
                 title,
                 description,
+                category,
+                roomType,
+                styleMood,
+                spaceSize,
+                budgetRange,
                 specs: specs ? JSON.stringify(specs) : null,
                 budget,
                 attachments: attachments ? JSON.stringify(attachments) : null,
@@ -121,9 +131,26 @@ app.post('/api/customer/quotes/:id/accept', verifyToken, async (req, res) => {
         const quote = await prisma.quote.findUnique({ where: { id: req.params.id }, include: { request: true } });
         if (!quote || quote.request.customerId !== req.user.id) return res.status(404).json({ error: 'Quote not found' });
 
+        const amt1 = Math.round(quote.price * 0.3);
+        const amt2 = Math.round(quote.price * 0.4);
+        const amt3 = quote.price - amt1 - amt2;
+
         const order = await prisma.order.create({
-            data: { quoteId: quote.id, totalPrice: quote.price, status: 'IN_PROGRESS' }
+            data: {
+                quoteId: quote.id,
+                totalPrice: quote.price,
+                status: 'IN_PROGRESS',
+                milestones: {
+                    create: [
+                        { title: 'Raw Material Arrival', description: 'Photo-verified proof of material procurement', amount: amt1, status: 'PENDING' },
+                        { title: 'Frame Completion', description: 'Structural assembly verified with photos', amount: amt2, status: 'PENDING' },
+                        { title: 'Finishing & Delivery', description: 'Polish, finishing touches, and delivery scheduling', amount: amt3, status: 'PENDING' }
+                    ]
+                }
+            },
+            include: { milestones: true }
         });
+
         await prisma.quote.update({ where: { id: quote.id }, data: { status: 'ACCEPTED' } });
         await prisma.request.update({ where: { id: quote.requestId }, data: { status: 'IN_PROGRESS' } });
 
@@ -132,7 +159,241 @@ app.post('/api/customer/quotes/:id/accept', verifyToken, async (req, res) => {
         });
 
         res.json(order);
-    } catch (error) { res.status(500).json({ error: 'Server error' }); }
+    } catch (error) { 
+        console.error(error);
+        res.status(500).json({ error: 'Server error' }); 
+    }
+});
+
+// GET customer orders
+app.get('/api/customer/orders', verifyToken, async (req, res) => {
+    if (req.user.role !== 'CUSTOMER') return res.status(403).json({ error: 'Forbidden' });
+    try {
+        const orders = await prisma.order.findMany({
+            where: { quote: { request: { customerId: req.user.id } } },
+            include: {
+                quote: {
+                    include: {
+                        request: true,
+                        maker: {
+                            select: { id: true, name: true, email: true, shopName: true, verificationLevel: true, isGstVerified: true, isIdVerified: true, isShopVerified: true }
+                        }
+                    }
+                },
+                milestones: {
+                    orderBy: { createdAt: 'asc' }
+                }
+            }
+        });
+        res.json(orders);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Maker Upload Milestone Photo Proof
+app.post('/api/maker/orders/:orderId/milestones/:milestoneId/upload', verifyToken, async (req, res) => {
+    if (req.user.role !== 'MAKER') return res.status(403).json({ error: 'Forbidden' });
+    const { photoUrl } = req.body;
+    if (!photoUrl) return res.status(400).json({ error: 'photoUrl is required' });
+
+    try {
+        const order = await prisma.order.findUnique({
+            where: { id: req.params.orderId },
+            include: { quote: true }
+        });
+        if (!order || order.quote.makerId !== req.user.id) {
+            return res.status(404).json({ error: 'Order not found' });
+        }
+
+        const updatedMilestone = await prisma.milestone.update({
+            where: { id: req.params.milestoneId },
+            data: {
+                photoUrl,
+                photoUploadedAt: new Date(),
+                photoVerified: false,
+                isDisputed: false,
+                disputeReason: null
+            }
+        });
+
+        const reqDetail = await prisma.request.findFirst({
+            where: { quotes: { some: { order: { id: req.params.orderId } } } }
+        });
+
+        await prisma.notification.create({
+            data: {
+                userId: reqDetail.customerId,
+                type: 'ORDER_UPDATE',
+                title: 'Progress Photo Uploaded',
+                message: `Maker uploaded progress proof for "${updatedMilestone.title}" on your order.`
+            }
+        });
+
+        res.json(updatedMilestone);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Customer Verify Milestone Photo
+app.post('/api/customer/orders/:orderId/milestones/:milestoneId/verify', verifyToken, async (req, res) => {
+    if (req.user.role !== 'CUSTOMER') return res.status(403).json({ error: 'Forbidden' });
+    try {
+        const milestone = await prisma.milestone.findUnique({
+            where: { id: req.params.milestoneId },
+            include: { order: { include: { quote: { include: { request: true } } } } }
+        });
+        if (!milestone || milestone.order.quote.request.customerId !== req.user.id) {
+            return res.status(404).json({ error: 'Milestone not found' });
+        }
+
+        const updatedMilestone = await prisma.milestone.update({
+            where: { id: req.params.milestoneId },
+            data: {
+                photoVerified: true,
+                status: 'COMPLETED',
+                isDisputed: false,
+                disputeReason: null
+            }
+        });
+
+        await prisma.notification.create({
+            data: {
+                userId: milestone.order.quote.makerId,
+                type: 'ORDER_UPDATE',
+                title: 'Photo Proof Approved',
+                message: `Customer approved the progress photo for "${milestone.title}"!`
+            }
+        });
+
+        res.json(updatedMilestone);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Customer Dispute Milestone
+app.post('/api/customer/orders/:orderId/milestones/:milestoneId/dispute', verifyToken, async (req, res) => {
+    if (req.user.role !== 'CUSTOMER') return res.status(403).json({ error: 'Forbidden' });
+    const { reason } = req.body;
+    if (!reason) return res.status(400).json({ error: 'Reason is required' });
+
+    try {
+        const milestone = await prisma.milestone.findUnique({
+            where: { id: req.params.milestoneId },
+            include: { order: { include: { quote: { include: { request: true } } } } }
+        });
+        if (!milestone || milestone.order.quote.request.customerId !== req.user.id) {
+            return res.status(404).json({ error: 'Milestone not found' });
+        }
+
+        const updatedMilestone = await prisma.milestone.update({
+            where: { id: req.params.milestoneId },
+            data: {
+                isDisputed: true,
+                disputeReason: reason,
+                photoVerified: false
+            }
+        });
+
+        await prisma.notification.create({
+            data: {
+                userId: milestone.order.quote.makerId,
+                type: 'ORDER_UPDATE',
+                title: 'Milestone Disputed',
+                message: `Customer raised a dispute on "${milestone.title}". Reason: ${reason}`
+            }
+        });
+
+        res.json(updatedMilestone);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Customer Release Milestone Payment
+app.post('/api/customer/orders/:orderId/milestones/:milestoneId/release', verifyToken, async (req, res) => {
+    if (req.user.role !== 'CUSTOMER') return res.status(403).json({ error: 'Forbidden' });
+    try {
+        const milestone = await prisma.milestone.findUnique({
+            where: { id: req.params.milestoneId },
+            include: { order: { include: { quote: { include: { request: true } } } } }
+        });
+        if (!milestone || milestone.order.quote.request.customerId !== req.user.id) {
+            return res.status(404).json({ error: 'Milestone not found' });
+        }
+
+        const updatedMilestone = await prisma.milestone.update({
+            where: { id: req.params.milestoneId },
+            data: {
+                status: 'PAID',
+                isDisputed: false,
+                disputeReason: null
+            }
+        });
+
+        const order = await prisma.order.findUnique({
+            where: { id: milestone.orderId },
+            include: { milestones: true, quote: true }
+        });
+        const allPaid = order.milestones.every(m => m.status === 'PAID');
+        if (allPaid) {
+            await prisma.order.update({
+                where: { id: order.id },
+                data: { status: 'COMPLETED' }
+            });
+            await prisma.request.update({
+                where: { id: order.quote.requestId },
+                data: { status: 'COMPLETED' }
+            });
+
+            const makerId = order.quote.makerId;
+            const completedOrders = await prisma.order.findMany({
+                where: { quote: { makerId }, status: 'COMPLETED' }
+            });
+            const allOrders = await prisma.order.findMany({
+                where: { quote: { makerId } }
+            });
+            const totalJobs = completedOrders.length;
+            const compRate = allOrders.length > 0 ? (totalJobs / allOrders.length) * 100 : 100;
+
+            await prisma.user.update({
+                where: { id: makerId },
+                data: {
+                    totalJobsCompleted: totalJobs,
+                    completionRate: Math.round(compRate * 10) / 10
+                }
+            });
+
+            await prisma.notification.create({
+                data: {
+                    userId: makerId,
+                    type: 'ORDER_UPDATE',
+                    title: 'Order Completed! 🎉',
+                    message: `Congratulations! Your order for "${order.quote.request.title}" is fully completed and paid.`
+                }
+            });
+        }
+
+        await prisma.notification.create({
+            data: {
+                userId: milestone.order.quote.makerId,
+                type: 'ORDER_UPDATE',
+                title: 'Payment Released',
+                message: `Milestone payment of ₹${milestone.amount.toLocaleString('en-IN')} has been released.`
+            }
+        });
+
+        res.json(updatedMilestone);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Server error' });
+    }
 });
 
 // --- MAKER API ---
@@ -150,10 +411,10 @@ app.get('/api/maker/requests', verifyToken, async (req, res) => {
 app.post('/api/maker/quotes', verifyToken, async (req, res) => {
     if (req.user.role !== 'MAKER') return res.status(403).json({ error: 'Forbidden' });
     try {
-        const { requestId, price, message, proposedTimeline } = req.body;
+        const { requestId, price, materialsCost, laborCost, hardwareCost, deliveryCost, gstAmount, warrantyTerms, message, proposedTimeline } = req.body;
         const request = await prisma.request.findUnique({ where: { id: requestId } });
         const quote = await prisma.quote.create({
-            data: { makerId: req.user.id, requestId, price, message, proposedTimeline }
+            data: { makerId: req.user.id, requestId, price, materialsCost, laborCost, hardwareCost, deliveryCost, gstAmount, warrantyTerms, message, proposedTimeline }
         });
         await prisma.request.update({ where: { id: requestId }, data: { status: 'QUOTED' } });
 
@@ -172,10 +433,26 @@ app.get('/api/maker/orders', verifyToken, async (req, res) => {
     try {
         const orders = await prisma.order.findMany({
             where: { quote: { makerId: req.user.id } },
-            include: { quote: { include: { request: true } }, milestones: true }
+            include: {
+                quote: {
+                    include: {
+                        request: {
+                            include: {
+                                customer: { select: { id: true, name: true, email: true, phone: true } }
+                            }
+                        }
+                    }
+                },
+                milestones: {
+                    orderBy: { createdAt: 'asc' }
+                }
+            }
         });
         res.json(orders);
-    } catch (error) { res.status(500).json({ error: 'Server error' }); }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Server error' });
+    }
 });
 
 // --- MESSAGING API ---
@@ -311,6 +588,176 @@ app.get('/api/customer/stats', verifyToken, async (req, res) => {
         const totalSpent = completedOrders.reduce((sum, r) => sum + (r.budget || 0), 0);
         res.json({ totalRequests, activeOrders, quotesReceived: quoteCount, totalSpent });
     } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// --- ADMIN API ---
+app.get('/api/admin/makers', verifyToken, async (req, res) => {
+    if (req.user.role !== 'ADMIN') return res.status(403).json({ error: 'Forbidden' });
+    try {
+        const makers = await prisma.user.findMany({
+            where: { role: 'MAKER' },
+            orderBy: { createdAt: 'desc' }
+        });
+        res.json(makers);
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+app.post('/api/admin/makers/:id/verify', verifyToken, async (req, res) => {
+    if (req.user.role !== 'ADMIN') return res.status(403).json({ error: 'Forbidden' });
+    const { isGstVerified, isIdVerified, isShopVerified, verificationLevel } = req.body;
+    try {
+        const updated = await prisma.user.update({
+            where: { id: req.params.id },
+            data: {
+                isGstVerified: isGstVerified !== undefined ? isGstVerified : undefined,
+                isIdVerified: isIdVerified !== undefined ? isIdVerified : undefined,
+                isShopVerified: isShopVerified !== undefined ? isShopVerified : undefined,
+                verificationLevel: verificationLevel !== undefined ? verificationLevel : undefined
+            }
+        });
+        res.json(updated);
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+app.get('/api/admin/disputes', verifyToken, async (req, res) => {
+    if (req.user.role !== 'ADMIN') return res.status(403).json({ error: 'Forbidden' });
+    try {
+        const disputes = await prisma.milestone.findMany({
+            where: { isDisputed: true },
+            include: {
+                order: {
+                    include: {
+                        quote: {
+                            include: {
+                                maker: { select: { id: true, name: true, email: true } },
+                                request: { include: { customer: { select: { id: true, name: true, email: true } } } }
+                            }
+                        }
+                    }
+                }
+            },
+            orderBy: { updatedAt: 'desc' }
+        });
+        res.json(disputes);
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+app.post('/api/admin/disputes/:milestoneId/resolve', verifyToken, async (req, res) => {
+    if (req.user.role !== 'ADMIN') return res.status(403).json({ error: 'Forbidden' });
+    const { resolution } = req.body;
+    if (!['CUSTOMER', 'MAKER'].includes(resolution)) {
+        return res.status(400).json({ error: 'Invalid resolution choice' });
+    }
+
+    try {
+        const milestone = await prisma.milestone.findUnique({
+            where: { id: req.params.milestoneId },
+            include: { order: { include: { quote: true } } }
+        });
+        if (!milestone) return res.status(404).json({ error: 'Milestone not found' });
+
+        let updatedMilestone;
+        if (resolution === 'MAKER') {
+            updatedMilestone = await prisma.milestone.update({
+                where: { id: req.params.milestoneId },
+                data: {
+                    status: 'PAID',
+                    isDisputed: false,
+                    disputeReason: null,
+                    photoVerified: true
+                }
+            });
+
+            const order = await prisma.order.findUnique({
+                where: { id: milestone.orderId },
+                include: { milestones: true, quote: true }
+            });
+            const allPaid = order.milestones.every(m => m.status === 'PAID');
+            if (allPaid) {
+                await prisma.order.update({ where: { id: order.id }, data: { status: 'COMPLETED' } });
+                await prisma.request.update({ where: { id: order.quote.requestId }, data: { status: 'COMPLETED' } });
+            }
+
+            await prisma.notification.create({
+                data: {
+                    userId: milestone.order.quote.makerId,
+                    type: 'ORDER_UPDATE',
+                    title: 'Dispute Resolved',
+                    message: `Admin resolved dispute on "${milestone.title}" in your favor. Payout of ₹${milestone.amount.toLocaleString('en-IN')} has been released.`
+                }
+            });
+        } else {
+            updatedMilestone = await prisma.milestone.update({
+                where: { id: req.params.milestoneId },
+                data: {
+                    status: 'PENDING',
+                    isDisputed: false,
+                    disputeReason: null,
+                    photoVerified: false,
+                    photoUrl: null,
+                    photoUploadedAt: null
+                }
+            });
+
+            await prisma.notification.create({
+                data: {
+                    userId: milestone.order.quote.makerId,
+                    type: 'ORDER_UPDATE',
+                    title: 'Dispute Resolved',
+                    message: `Admin resolved dispute on "${milestone.title}" in the customer's favor. Please upload a correct proof of progress.`
+                }
+            });
+        }
+
+        res.json(updatedMilestone);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// --- MAKER ANALYTICS ---
+app.get('/api/maker/analytics', verifyToken, async (req, res) => {
+    if (req.user.role !== 'MAKER') return res.status(403).json({ error: 'Forbidden' });
+    try {
+        const paidMilestones = await prisma.milestone.findMany({
+            where: { status: 'PAID', order: { quote: { makerId: req.user.id } } },
+            select: { amount: true }
+        });
+        const totalEarnings = paidMilestones.reduce((sum, m) => sum + m.amount, 0);
+
+        const lockedMilestones = await prisma.milestone.findMany({
+            where: { status: { in: ['PENDING', 'COMPLETED'] }, order: { quote: { makerId: req.user.id } } },
+            select: { amount: true }
+        });
+        const escrowPipeline = lockedMilestones.reduce((sum, m) => sum + m.amount, 0);
+
+        const totalQuotes = await prisma.quote.count({ where: { makerId: req.user.id } });
+        const acceptedQuotes = await prisma.quote.count({ where: { makerId: req.user.id, status: 'ACCEPTED' } });
+        const rejectedQuotes = await prisma.quote.count({ where: { makerId: req.user.id, status: 'REJECTED' } });
+        const pendingQuotes = await prisma.quote.count({ where: { makerId: req.user.id, status: 'PENDING' } });
+
+        const completedOrders = await prisma.order.count({ where: { quote: { makerId: req.user.id }, status: 'COMPLETED' } });
+
+        res.json({
+            totalEarnings,
+            escrowPipeline,
+            quotesSent: totalQuotes,
+            quotesAccepted: acceptedQuotes,
+            quotesRejected: rejectedQuotes,
+            quotesPending: pendingQuotes,
+            completedOrders
+        });
+    } catch (error) {
+        console.error(error);
         res.status(500).json({ error: 'Server error' });
     }
 });

@@ -863,6 +863,31 @@
     color: var(--text-light);
 }
 
+/* Curated Collection Chips */
+.curated-collections {
+    padding-bottom: 4px;
+}
+
+.curated-chip {
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(196, 160, 90, 0.2);
+    border-radius: 20px;
+    color: rgba(232, 213, 176, 0.75);
+    font-size: 0.75rem;
+    font-weight: 550;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.curated-chip:hover {
+    background: rgba(196, 160, 90, 0.08);
+    border-color: rgba(196, 160, 90, 0.6);
+    color: var(--gold);
+    transform: translateY(-1px);
+}
+
 /* ====== Order Timeline ====== */
 .order-timeline {
     display: flex;

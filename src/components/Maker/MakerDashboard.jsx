@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import api from '../../api';
 import ProfileSettings from '../ProfileSettings';
 import { toast, Toaster } from 'react-hot-toast';
-import { LayoutDashboard, CheckSquare, MessageSquare, Settings, IndianRupee, Image, Plus, Trash2 } from 'lucide-react';
+import { LayoutDashboard, CheckSquare, MessageSquare, Settings, IndianRupee, Image, Plus, Trash2, Star, Clock, BarChart3 } from 'lucide-react';
+import EscrowTracker from '../EscrowTracker';
+import MakerAnalytics from './MakerAnalytics';
 import '../Dashboard.css';
 
 export default function MakerDashboard() {
@@ -17,6 +19,9 @@ export default function MakerDashboard() {
     const [portfolio, setPortfolio] = useState([]);
     const [portfolioForm, setPortfolioForm] = useState({ imageUrl: '', caption: '', category: '' });
 
+    // Maker profile stats
+    const [profile, setProfile] = useState(null);
+
     // Quote form state
     const [price, setPrice] = useState('');
     const [message, setMessage] = useState('');
@@ -24,12 +29,14 @@ export default function MakerDashboard() {
 
     const fetchData = async () => {
         try {
-            const [reqRes, ordRes] = await Promise.all([
+            const [reqRes, ordRes, profRes] = await Promise.all([
                 api.get('/maker/requests'),
-                api.get('/maker/orders')
+                api.get('/maker/orders'),
+                api.get('/profile')
             ]);
             setOpenRequests(reqRes.data);
             setOrders(ordRes.data);
+            setProfile(profRes.data);
         } catch (err) {
             console.error(err);
             toast.error("Failed to load dashboard data.");
@@ -45,8 +52,8 @@ export default function MakerDashboard() {
 
     const fetchPortfolio = async () => {
         try {
-            const profile = await api.get('/profile');
-            const res = await api.get(`/makers/${profile.data.id}/portfolio`);
+            const profId = profile?.id || (await api.get('/profile')).data.id;
+            const res = await api.get(`/makers/${profId}/portfolio`);
             setPortfolio(res.data);
         } catch { /* silent */ }
     };
@@ -125,6 +132,9 @@ export default function MakerDashboard() {
                 </button>
                 <button className={`sidebar-tab ${activeTab === 'orders' ? 'active' : ''}`} onClick={() => setActiveTab('orders')}>
                     <CheckSquare size={20} /> Active Orders
+                </button>
+                <button className={`sidebar-tab ${activeTab === 'analytics' ? 'active' : ''}`} onClick={() => setActiveTab('analytics')}>
+                    <BarChart3 size={20} /> Business Analytics
                 </button>
                 <button className={`sidebar-tab ${activeTab === 'portfolio' ? 'active' : ''}`} onClick={() => setActiveTab('portfolio')}>
                     <Image size={20} /> Portfolio
@@ -245,8 +255,26 @@ export default function MakerDashboard() {
 
                 {activeTab === 'orders' && (
                     <>
-                        <div className="dashboard-header">
-                            <h2>Active Orders</h2>
+                        {profile && (
+                            <div className="dashboard-stats-row anim-fade-up" style={{ marginBottom: '25px' }}>
+                                <div className="dashboard-stat-card">
+                                    <div className="dashboard-stat-icon" style={{ background: 'rgba(46,204,113,0.15)', color: '#2ecc71' }}><CheckSquare size={20} /></div>
+                                    <div><span className="dashboard-stat-value">{profile.totalJobsCompleted || 0}</span><span className="dashboard-stat-label">Jobs Completed</span></div>
+                                </div>
+                                <div className="dashboard-stat-card">
+                                    <div className="dashboard-stat-icon" style={{ background: 'rgba(212,175,55,0.15)', color: 'var(--gold)' }}><Star size={20} /></div>
+                                    <div><span className="dashboard-stat-value">{profile.completionRate || 100}%</span><span className="dashboard-stat-label">Completion Rate</span></div>
+                                </div>
+                                <div className="dashboard-stat-card">
+                                    <div className="dashboard-stat-icon" style={{ background: 'rgba(52,152,219,0.15)', color: '#3498db' }}><Clock size={20} /></div>
+                                    <div><span className="dashboard-stat-value">{profile.avgResponseTime || 120}m</span><span className="dashboard-stat-label">Avg. Response Time</span></div>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="dashboard-header" style={{ marginBottom: '1.5rem' }}>
+                            <h2>Active Orders ({orders.length})</h2>
+                            <p style={{ color: 'var(--text-muted)', marginTop: '4px' }}>Provide milestone photo proofs to request customer release of funds.</p>
                         </div>
 
                         {orders.length === 0 ? (
@@ -255,26 +283,23 @@ export default function MakerDashboard() {
                                 <p>When a customer accepts your proposal, it will appear here.</p>
                             </div>
                         ) : (
-                            <div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                 {orders.map(order => (
-                                    <div key={order.id} className="dashboard-card" style={{ borderColor: 'rgba(46, 204, 113, 0.3)' }}>
-                                        <div className="card-header">
-                                            <div>
-                                                <h3 className="card-title">{order.quote.request.title}</h3>
-                                                <p className="card-subtitle">Total: <IndianRupee size={12} />{order.totalPrice}</p>
-                                            </div>
-                                            <span className={`status-badge status-${order.status}`}>{order.status.replace('_', ' ')}</span>
-                                        </div>
-                                        <div style={{ marginTop: '15px' }}>
-                                            <button style={{ padding: '8px 16px', background: 'transparent', border: '1px solid var(--gold)', color: 'var(--gold)', borderRadius: '6px', cursor: 'pointer' }}>
-                                                Update Status
-                                            </button>
-                                        </div>
-                                    </div>
+                                    <EscrowTracker 
+                                        key={order.id} 
+                                        order={order} 
+                                        lang="en" 
+                                        role="MAKER" 
+                                        onRefresh={() => { fetchData(); }} 
+                                    />
                                 ))}
                             </div>
                         )}
                     </>
+                )}
+
+                {activeTab === 'analytics' && (
+                    <MakerAnalytics />
                 )}
 
                 {activeTab === 'messages' && (

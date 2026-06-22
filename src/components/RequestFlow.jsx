@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { t } from '../i18n';
 import './RequestFlow.css';
 
-const CATEGORIES = ['Bed', 'Wardrobe', 'Dining Table', 'Sofa Set', 'TV Unit', 'Bookshelf', 'Office Desk', 'Temple / Mandir', 'Shoe Rack', 'Other'];
-const WOOD_GRADES = ['Sheesham Grade-A', 'Sheesham Grade-B', 'Teak Premium', 'Teak Standard', 'Mango Wood Select', 'Mango Wood Standard', 'Pine', 'Rubber Wood'];
-const FINISHES = ['Matte PU', 'Gloss PU', 'Natural Oil', 'Melamine', 'Lacquer', 'Raw / Unfinished'];
+const CATEGORIES = ['Bed', 'Wardrobe', 'Dining Table', 'Sofa Set', 'TV Unit', 'Bookshelf', 'Office Desk', 'Modular Kitchen', 'Shoe Rack', 'Other'];
+const ROOM_TYPES = ['Bedroom', 'Living Room', 'Dining Room', 'Kitchen', 'Home Office', 'Outdoor', 'Other'];
+const STYLE_MOODS = ['Modern Minimalist', 'Scandinavian', 'Luxury / Glam', 'Rustic / Farmhouse', 'Industrial', 'Traditional / Classic', 'Mid-Century Modern'];
+const WOOD_GRADES = ['Sheesham Grade-A', 'Sheesham Grade-B', 'Teak Premium', 'Teak Standard', 'Mango Wood Select', 'Mango Wood Standard', 'Pine', 'Rubber Wood', 'Commercial Plywood', 'Marine Plywood', 'MDF / HDF'];
+const FINISHES = ['Matte PU', 'Gloss PU', 'Natural Oil', 'Melamine', 'Lacquer', 'Laminate', 'Veneer', 'Raw / Unfinished'];
 const STORAGE_TYPES = ['None', 'Under-bed drawers', 'Hydraulic lift', 'Side shelves', 'Built-in drawers', 'Open shelves'];
 const BUDGETS = ['Under ₹10,000', '₹10,000 – ₹20,000', '₹20,000 – ₹30,000', '₹30,000 – ₹50,000', '₹50,000 – ₹1,00,000', 'Above ₹1,00,000'];
 
@@ -17,29 +19,38 @@ export default function RequestFlow({ lang, onClose, onSubmit }) {
     const [links, setLinks] = useState('');
     const [description, setDescription] = useState('');
     const [submitted, setSubmitted] = useState(false);
+
+    // New Fields for better clarity
+    const [roomType, setRoomType] = useState('Bedroom');
+    const [styleMood, setStyleMood] = useState('Modern Minimalist');
+    const [spaceSize, setSpaceSize] = useState('');
+    const [budgetRange, setBudgetRange] = useState('₹20,000 – ₹30,000');
+    const [category, setCategory] = useState('Bed');
+
     const [spec, setSpec] = useState({
-        category: 'Bed',
         length: '78',
         width: '60',
         height: '36',
         wood: 'Sheesham Grade-A',
         finish: 'Matte PU',
         storage: 'Hydraulic lift',
-        budget: '₹20,000 – ₹30,000',
         headboard: '42',
         notes: '',
     });
 
-    // Simulated AI analysis
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+    // Simulated AI analysis based on selections
     const aiAnalysis = {
-        wood: 'Sheesham (Rosewood)',
-        finish: 'Matte PU Coating',
-        dims: '78" × 60" × 36" (est.)',
-        style: 'Modern Minimalist with Storage',
-        confidence: 87,
+        wood: 'Premium Wood Matching Reference',
+        finish: 'Finish Matching Reference',
+        dims: `${spec.length}" × ${spec.width}" × ${spec.height}" (est.)`,
+        style: styleMood,
+        confidence: 94,
+        recommendation: `For a ${styleMood} ${category} in your ${roomType}, we recommend focusing on high-quality materials and ${spec.finish} finish. A budget of ${budgetRange} is realistic for a premium build.`
     };
 
-    const isAntiWaste = spec.category === 'Shoe Rack' || spec.category === 'Other';
+    const isAntiWaste = category === 'Shoe Rack' || category === 'Other';
 
     const handleImageDrop = (e) => {
         e.preventDefault();
@@ -52,11 +63,38 @@ export default function RequestFlow({ lang, onClose, onSubmit }) {
         });
     };
 
+    const runAIAnalysis = () => {
+        setIsAnalyzing(true);
+        setTimeout(() => {
+            setIsAnalyzing(false);
+            setStep(step + 1);
+        }, 1500); // Simulate API delay
+    };
+
+    const handleNext = () => {
+        if (step === 0) {
+            runAIAnalysis();
+        } else {
+            setStep(step + 1);
+        }
+    };
+
     const handleSubmit = () => {
         setSubmitted(true);
         const finalAttachments = [...attachments, ...links.split(/[\n,]+/).map(s => s.trim()).filter(Boolean)];
-        const aiMessage = `**AI Insights for Craftsman:**\n- **Project Focus:** High-quality ${spec.category} using ${spec.wood}.\n- **Customer Priority:** Durability and exact dimensions.\n- **Storage Requirement:** ${spec.storage}.\n- **References Provided:** ${finalAttachments.length > 0 ? finalAttachments.length + ' references attached.' : 'No references.'}\nMake sure to review the provided links or images if any!`;
-        onSubmit?.({ spec, description, attachments: finalAttachments, aiInsights: aiMessage });
+        const aiMessage = `**AI Insights for Craftsman:**\n- **Project Focus:** High-quality ${category} for a ${roomType} using ${spec.wood}.\n- **Style Direction:** ${styleMood}.\n- **Customer Priority:** Durability and exact dimensions (${spaceSize ? spaceSize + ' space available' : 'TBD'}).\n- **Storage Requirement:** ${spec.storage}.\n- **Budget Expectation:** ${budgetRange}.\n- **References Provided:** ${finalAttachments.length > 0 ? finalAttachments.length + ' references attached.' : 'No references.'}\nPlease review all attachments and submit an itemized quote.`;
+        
+        onSubmit?.({ 
+            spec, 
+            description, 
+            attachments: finalAttachments, 
+            aiInsights: aiMessage,
+            category,
+            roomType,
+            styleMood,
+            spaceSize,
+            budgetRange
+        });
     };
 
     if (submitted) {
@@ -99,7 +137,7 @@ export default function RequestFlow({ lang, onClose, onSubmit }) {
                 {/* Step 1: Upload & Describe */}
                 {step === 0 && (
                     <div className="rf__step anim-fade-up">
-                        <h2 className="rf__title">{t('rf_title', lang)}</h2>
+                        <h2 className="rf__title">Start Your Custom Piece</h2>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                             <div
                                 className={`rf__dropzone ${dragOver ? 'rf__dropzone--hover' : ''}`}
@@ -122,29 +160,48 @@ export default function RequestFlow({ lang, onClose, onSubmit }) {
                                             <polyline points="21 15 16 10 5 21" />
                                         </svg>
                                         <h3>{t('rf_upload_title', lang)}</h3>
-                                        <p>Drag & drop multiple images or click to browse</p>
+                                        <p>Drag & drop reference images or click to browse</p>
                                     </>
                                 )}
                                 <input type="file" id="rf-file-input" accept="image/*" multiple onChange={handleImageDrop} hidden />
                             </div>
 
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '8px', color: 'var(--text-muted)', fontSize: '0.9rem' }}>Reference Links (YouTube, Instagram, Pinterest)</label>
-                                <textarea
-                                    className="rf__textarea"
-                                    placeholder="Paste inspiration links here..."
-                                    value={links}
-                                    onChange={(e) => setLinks(e.target.value)}
-                                    rows={2}
-                                />
+                            <div className="rf__field-row">
+                                <div className="rf__field">
+                                    <label>Category</label>
+                                    <select value={category} onChange={(e) => setCategory(e.target.value)}>
+                                        {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                                    </select>
+                                </div>
+                                <div className="rf__field">
+                                    <label>Room Type</label>
+                                    <select value={roomType} onChange={(e) => setRoomType(e.target.value)}>
+                                        {ROOM_TYPES.map(r => <option key={r} value={r}>{r}</option>)}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="rf__field-row">
+                                <div className="rf__field">
+                                    <label>Style Mood</label>
+                                    <select value={styleMood} onChange={(e) => setStyleMood(e.target.value)}>
+                                        {STYLE_MOODS.map(s => <option key={s} value={s}>{s}</option>)}
+                                    </select>
+                                </div>
+                                <div className="rf__field">
+                                    <label>Budget Range</label>
+                                    <select value={budgetRange} onChange={(e) => setBudgetRange(e.target.value)}>
+                                        {BUDGETS.map(b => <option key={b} value={b}>{b}</option>)}
+                                    </select>
+                                </div>
                             </div>
 
                             <textarea
                                 className="rf__textarea"
-                                placeholder={t('rf_describe', lang)}
+                                placeholder="Describe any specific details, functionality, or constraints..."
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
-                                rows={3}
+                                rows={2}
                             />
                         </div>
                     </div>
@@ -153,49 +210,57 @@ export default function RequestFlow({ lang, onClose, onSubmit }) {
                 {/* Step 2: AI Analysis */}
                 {step === 1 && (
                     <div className="rf__step anim-fade-up">
-                        <h2 className="rf__title">{t('rf_ai_title', lang)}</h2>
-                        <p className="rf__subtitle">{t('rf_ai_subtitle', lang)}</p>
-
-                        <div className="rf__ai-card glass-card">
-                            <div className="rf__ai-confidence">
-                                <div className="rf__ai-ring">
-                                    <svg viewBox="0 0 100 100">
-                                        <circle cx="50" cy="50" r="42" fill="none" stroke="var(--border)" strokeWidth="6" />
-                                        <circle cx="50" cy="50" r="42" fill="none" stroke="var(--gold)" strokeWidth="6"
-                                            strokeDasharray={`${aiAnalysis.confidence * 2.64} ${264 - aiAnalysis.confidence * 2.64}`}
-                                            strokeDashoffset="66" strokeLinecap="round" />
-                                    </svg>
-                                    <span>{aiAnalysis.confidence}%</span>
-                                </div>
-                                <span className="rf__ai-conf-label">Confidence</span>
+                        {isAnalyzing ? (
+                            <div className="rf__ai-loading">
+                                <div className="spinner"></div>
+                                <p>KaariGhar AI is analyzing your request...</p>
                             </div>
+                        ) : (
+                            <>
+                                <h2 className="rf__title">AI Smart Analysis</h2>
+                                <p className="rf__subtitle">We analyzed your request to help craftsmen give precise quotes.</p>
 
-                            <div className="rf__ai-results">
-                                <div className="rf__ai-row">
-                                    <span className="rf__ai-label">{t('rf_ai_wood', lang)}</span>
-                                    <span className="rf__ai-value">{aiAnalysis.wood}</span>
+                                <div className="rf__ai-card glass-card">
+                                    <div className="rf__ai-confidence">
+                                        <div className="rf__ai-ring">
+                                            <svg viewBox="0 0 100 100">
+                                                <circle cx="50" cy="50" r="42" fill="none" stroke="var(--border)" strokeWidth="6" />
+                                                <circle cx="50" cy="50" r="42" fill="none" stroke="var(--gold)" strokeWidth="6"
+                                                    strokeDasharray={`${aiAnalysis.confidence * 2.64} ${264 - aiAnalysis.confidence * 2.64}`}
+                                                    strokeDashoffset="66" strokeLinecap="round" />
+                                            </svg>
+                                            <span>{aiAnalysis.confidence}%</span>
+                                        </div>
+                                        <span className="rf__ai-conf-label">Confidence</span>
+                                    </div>
+
+                                    <div className="rf__ai-results">
+                                        <div className="rf__ai-row">
+                                            <span className="rf__ai-label">Suggested Style</span>
+                                            <span className="rf__ai-value">{aiAnalysis.style}</span>
+                                        </div>
+                                        <div className="rf__ai-row">
+                                            <span className="rf__ai-label">Recommended Finish</span>
+                                            <span className="rf__ai-value">{aiAnalysis.finish}</span>
+                                        </div>
+                                        <div className="rf__ai-row">
+                                            <span className="rf__ai-label">Estimated Dims</span>
+                                            <span className="rf__ai-value">{aiAnalysis.dims}</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="rf__ai-row">
-                                    <span className="rf__ai-label">{t('rf_ai_finish', lang)}</span>
-                                    <span className="rf__ai-value">{aiAnalysis.finish}</span>
+                                <div className="rf__ai-recommendation mt-4 text-sm text-gray-400">
+                                    <p>💡 {aiAnalysis.recommendation}</p>
                                 </div>
-                                <div className="rf__ai-row">
-                                    <span className="rf__ai-label">{t('rf_ai_dims', lang)}</span>
-                                    <span className="rf__ai-value">{aiAnalysis.dims}</span>
-                                </div>
-                                <div className="rf__ai-row">
-                                    <span className="rf__ai-label">{t('rf_ai_style', lang)}</span>
-                                    <span className="rf__ai-value">{aiAnalysis.style}</span>
-                                </div>
-                            </div>
-                        </div>
+                            </>
+                        )}
                     </div>
                 )}
 
                 {/* Step 3: Spec Template */}
                 {step === 2 && (
                     <div className="rf__step anim-fade-up">
-                        <h2 className="rf__title">{t('rf_spec_title', lang)}</h2>
+                        <h2 className="rf__title">Refine Technical Specs</h2>
 
                         {isAntiWaste && (
                             <div className="rf__antiwaste">
@@ -208,35 +273,29 @@ export default function RequestFlow({ lang, onClose, onSubmit }) {
                         )}
 
                         <div className="rf__form">
-                            <div className="rf__field">
-                                <label>{t('rf_spec_category', lang)}</label>
-                                <select value={spec.category} onChange={(e) => setSpec({ ...spec, category: e.target.value })}>
-                                    {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                                </select>
-                            </div>
                             <div className="rf__field-row">
                                 <div className="rf__field">
-                                    <label>{t('rf_spec_length', lang)}</label>
+                                    <label>Estimated Length (inches)</label>
                                     <input type="number" value={spec.length} onChange={(e) => setSpec({ ...spec, length: e.target.value })} />
                                 </div>
                                 <div className="rf__field">
-                                    <label>{t('rf_spec_width', lang)}</label>
+                                    <label>Estimated Width (inches)</label>
                                     <input type="number" value={spec.width} onChange={(e) => setSpec({ ...spec, width: e.target.value })} />
                                 </div>
                                 <div className="rf__field">
-                                    <label>{t('rf_spec_height', lang)}</label>
+                                    <label>Estimated Height (inches)</label>
                                     <input type="number" value={spec.height} onChange={(e) => setSpec({ ...spec, height: e.target.value })} />
                                 </div>
                             </div>
                             <div className="rf__field-row">
                                 <div className="rf__field">
-                                    <label>{t('rf_spec_wood', lang)}</label>
+                                    <label>Preferred Material/Wood</label>
                                     <select value={spec.wood} onChange={(e) => setSpec({ ...spec, wood: e.target.value })}>
                                         {WOOD_GRADES.map(w => <option key={w} value={w}>{w}</option>)}
                                     </select>
                                 </div>
                                 <div className="rf__field">
-                                    <label>{t('rf_spec_finish', lang)}</label>
+                                    <label>Finish Type</label>
                                     <select value={spec.finish} onChange={(e) => setSpec({ ...spec, finish: e.target.value })}>
                                         {FINISHES.map(f => <option key={f} value={f}>{f}</option>)}
                                     </select>
@@ -244,25 +303,19 @@ export default function RequestFlow({ lang, onClose, onSubmit }) {
                             </div>
                             <div className="rf__field-row">
                                 <div className="rf__field">
-                                    <label>{t('rf_spec_storage', lang)}</label>
+                                    <label>Storage Requirements</label>
                                     <select value={spec.storage} onChange={(e) => setSpec({ ...spec, storage: e.target.value })}>
                                         {STORAGE_TYPES.map(s => <option key={s} value={s}>{s}</option>)}
                                     </select>
                                 </div>
                                 <div className="rf__field">
-                                    <label>{t('rf_spec_budget', lang)}</label>
-                                    <select value={spec.budget} onChange={(e) => setSpec({ ...spec, budget: e.target.value })}>
-                                        {BUDGETS.map(b => <option key={b} value={b}>{b}</option>)}
-                                    </select>
+                                    <label>Available Space Size (Optional)</label>
+                                    <input type="text" placeholder="e.g. 10x12 ft room" value={spaceSize} onChange={(e) => setSpaceSize(e.target.value)} />
                                 </div>
                             </div>
                             <div className="rf__field">
-                                <label>{t('rf_spec_headboard', lang)}</label>
-                                <input type="number" value={spec.headboard} onChange={(e) => setSpec({ ...spec, headboard: e.target.value })} />
-                            </div>
-                            <div className="rf__field">
-                                <label>{t('rf_spec_notes', lang)}</label>
-                                <textarea value={spec.notes} onChange={(e) => setSpec({ ...spec, notes: e.target.value })} rows={2} />
+                                <label>Additional Maker Notes</label>
+                                <textarea value={spec.notes} placeholder="Any specific hardware brands, edge banding, or structural requirements?" onChange={(e) => setSpec({ ...spec, notes: e.target.value })} rows={2} />
                             </div>
                         </div>
                     </div>
@@ -271,41 +324,43 @@ export default function RequestFlow({ lang, onClose, onSubmit }) {
                 {/* Step 4: Review */}
                 {step === 3 && (
                     <div className="rf__step anim-fade-up">
-                        <h2 className="rf__title">{t('rf_review_title', lang)}</h2>
+                        <h2 className="rf__title">Review & Broadcast</h2>
                         <div className="rf__review glass-card">
                             <table className="rf__review-table">
                                 <tbody>
-                                    <tr><td>{t('rf_spec_category', lang)}</td><td>{spec.category}</td></tr>
+                                    <tr><td>Project</td><td>{styleMood} {category} for {roomType}</td></tr>
                                     <tr><td>Dimensions</td><td>{spec.length}" × {spec.width}" × {spec.height}"</td></tr>
-                                    <tr><td>{t('rf_spec_wood', lang)}</td><td>{spec.wood}</td></tr>
-                                    <tr><td>{t('rf_spec_finish', lang)}</td><td>{spec.finish}</td></tr>
-                                    <tr><td>{t('rf_spec_storage', lang)}</td><td>{spec.storage}</td></tr>
-                                    <tr><td>{t('rf_spec_budget', lang)}</td><td>{spec.budget}</td></tr>
-                                    <tr><td>{t('rf_spec_headboard', lang)}</td><td>{spec.headboard}"</td></tr>
-                                    {spec.notes && <tr><td>{t('rf_spec_notes', lang)}</td><td>{spec.notes}</td></tr>}
+                                    <tr><td>Material</td><td>{spec.wood} with {spec.finish} Finish</td></tr>
+                                    <tr><td>Storage</td><td>{spec.storage}</td></tr>
+                                    <tr><td>Budget Range</td><td>{budgetRange}</td></tr>
+                                    {spec.notes && <tr><td>Notes</td><td>{spec.notes}</td></tr>}
                                 </tbody>
                             </table>
                         </div>
+                        <p className="mt-4 text-center text-sm text-gray-400">
+                            Your request will be sent to verified makers matching your criteria. Expect itemized, transparent quotes within 24 hours.
+                        </p>
                     </div>
                 )}
 
                 {/* Navigation */}
                 <div className="rf__nav">
-                    {step > 0 && (
+                    {step > 0 && !isAnalyzing && (
                         <button className="outline-btn" onClick={() => setStep(step - 1)}>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>
-                            {t('rf_back', lang)}
+                            Back
                         </button>
                     )}
                     <div style={{ flex: 1 }} />
-                    {step < 3 ? (
-                        <button className="gold-btn" onClick={() => setStep(step + 1)}>
-                            {t('rf_next', lang)}
+                    {step < 3 && !isAnalyzing && (
+                        <button className="gold-btn" onClick={handleNext}>
+                            Next
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
                         </button>
-                    ) : (
+                    )}
+                    {step === 3 && (
                         <button className="gold-btn" onClick={handleSubmit}>
-                            {t('rf_submit', lang)}
+                            Submit to Makers
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12" /></svg>
                         </button>
                     )}

@@ -1,0 +1,75 @@
+.maker-analytics {
+    width: 100%;
+}
+
+.analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--space-md);
+}
+
+.analytics-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+.analytics-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.analytics-card.primary::before {
+    background: #2ecc71;
+}
+
+.analytics-card.secondary::before {
+    background: var(--gold);
+}
+
+.analytics-card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.analytics-card-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+}
+
+.analytics-card-value {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    font-weight: 750;
+    color: white;
+    line-height: 1.2;
+    margin-bottom: 6px;
+}
+
+.analytics-card-desc {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+    margin: 0;
+}
+
+.chart-box {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+}

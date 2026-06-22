@@ -37,11 +37,13 @@ export default function AuthTabs() {
             if (tab === 'login') {
                 const user = await login(email, password);
                 toast.success(`Welcome back, ${user.name}!`);
-                setTimeout(() => navigate(user.role === 'CUSTOMER' ? '/customer' : '/maker'), 900);
+                const target = user.role === 'ADMIN' ? '/admin' : user.role === 'MAKER' ? '/maker' : '/customer';
+                setTimeout(() => navigate(target), 900);
             } else {
                 const user = await register(email, password, name, role, phone, city);
                 toast.success('Account created successfully!');
-                setTimeout(() => navigate(user.role === 'CUSTOMER' ? '/customer' : '/maker'), 900);
+                const target = user.role === 'ADMIN' ? '/admin' : user.role === 'MAKER' ? '/maker' : '/customer';
+                setTimeout(() => navigate(target), 900);
             }
         } catch (err) {
             toast.error(err.response?.data?.error || 'Authentication failed');
