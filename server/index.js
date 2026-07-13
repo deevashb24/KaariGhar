@@ -1,20 +1,54 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import pkg from '@prisma/client';
 const { PrismaClient } = pkg;
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+
+import helmet from 'helmet';
+import xss from 'xss-clean';
+import rateLimit from 'express-rate-limit';
 
 dotenv.config();
 
 const app = express();
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 5001;
-const JWT_SECRET = process.env.JWT_SECRET || 'kaarighar-super-secret-key-change-me-in-prod';
 
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+    console.error('FATAL ERROR: JWT_SECRET environment variable is missing.');
+    process.exit(1);
+}
+
+if (!process.env.VITE_SUPABASE_URL || !process.env.VITE_SUPABASE_ANON_KEY) {
+    console.error('FATAL ERROR: VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY is missing.');
+    process.exit(1);
+}
+
+app.use(helmet());
 app.use(cors());
 app.use(express.json());
+app.use(xss());
+
+const globalLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per `window`
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many requests from this IP, please try again after 15 minutes' }
+});
+
+app.use('/api/', globalLimiter);
+
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 5,
+    message: { error: 'Too many authentication attempts from this IP, please try again after 15 minutes' }
+});
 
 // Basic health check
 app.get('/api/health', (req, res) => {
@@ -36,55 +70,56 @@ export const verifyToken = (req, res, next) => {
 };
 
 // --- AUTH API ---
-app.post('/api/auth/register', async (req, res) => {
+app.post('/api/auth/sync', authLimiter, async (req, res) => {
     try {
-        const { email, password, name, role, phone, city } = req.body;
+        const { access_token } = req.body;
+        if (!access_token) return res.status(400).json({ error: 'Access token required' });
 
-        let assignedRole = role;
-        if (email && email.toLowerCase() === 'admin@kaarighar.com') {
-            assignedRole = 'ADMIN';
-        }
-
-        if (!['CUSTOMER', 'MAKER', 'ADMIN'].includes(assignedRole)) {
-            return res.status(400).json({ error: 'Invalid role' });
-        }
-
-        const existingUser = await prisma.user.findUnique({ where: { email } });
-        if (existingUser) {
-            return res.status(400).json({ error: 'User already exists' });
-        }
-
-        const salt = await bcrypt.genSalt(10);
-        const passwordHash = await bcrypt.hash(password, salt);
-
-        const user = await prisma.user.create({
-            data: { email, passwordHash, name, role: assignedRole, phone: phone || null, city: city || null }
+        const response = await fetch(`${process.env.VITE_SUPABASE_URL}/auth/v1/user`, {
+            headers: {
+                Authorization: `Bearer ${access_token}`,
+                apikey: process.env.VITE_SUPABASE_ANON_KEY
+            }
         });
 
-        const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
-        res.status(201).json({ token, user: { id: user.id, email: user.email, name: user.name, role: user.role, isProfileComplete: user.isProfileComplete } });
-    } catch (error) {
-        res.status(500).json({ error: 'Server error' });
-    }
-});
-
-app.post('/api/auth/login', async (req, res) => {
-    try {
-        const { email, password } = req.body;
-
-        const user = await prisma.user.findUnique({ where: { email } });
-        if (!user) {
-            return res.status(400).json({ error: 'Invalid email or password' });
+        if (!response.ok) {
+            return res.status(401).json({ error: 'Invalid Supabase token' });
         }
 
-        const validPassword = await bcrypt.compare(password, user.passwordHash);
-        if (!validPassword) {
-            return res.status(400).json({ error: 'Invalid email or password' });
+        const supabaseUser = await response.json();
+        const email = supabaseUser.email;
+        
+        // Extract metadata set during manual sign up or Google sign up
+        const name = supabaseUser.user_metadata?.name || supabaseUser.user_metadata?.full_name || 'User';
+        const role = supabaseUser.user_metadata?.role || 'CUSTOMER';
+        const phone = supabaseUser.user_metadata?.phone || null;
+        const city = supabaseUser.user_metadata?.city || null;
+
+        let user = await prisma.user.findUnique({ where: { email } });
+        
+        if (!user) {
+            let assignedRole = role;
+            if (email.toLowerCase() === 'admin@kaarighar.com') {
+                assignedRole = 'ADMIN';
+            }
+
+            user = await prisma.user.create({
+                data: {
+                    email,
+                    name,
+                    passwordHash: '', // Auth is handled by Supabase
+                    role: assignedRole,
+                    phone,
+                    city,
+                    isProfileComplete: false
+                }
+            });
         }
 
         const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
         res.status(200).json({ token, user: { id: user.id, email: user.email, name: user.name, role: user.role, isProfileComplete: user.isProfileComplete } });
     } catch (error) {
+        console.error("Auth Sync Error:", error);
         res.status(500).json({ error: 'Server error' });
     }
 });

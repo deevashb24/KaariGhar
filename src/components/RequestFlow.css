@@ -1,6 +1,9 @@
 .rf {
     max-width: 680px;
     max-height: 88vh;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
 }
 
 /* Progress bar */
@@ -79,6 +82,7 @@
 /* Step content */
 .rf__step {
     margin-bottom: var(--space-xl);
+    flex: 1;
 }
 
 .rf__title {
@@ -331,6 +335,7 @@
     gap: var(--space-md);
     padding-top: var(--space-lg);
     border-top: 1px solid var(--border);
+    margin-top: auto;
 }
 
 /* Submitted */
